@@ -1,0 +1,7 @@
+{
+  "name": "CampusPilot",
+  "description": "AI-Powered Intelligent Campus Assistance System featuring 3D digital-twin navigation, safety-aware route optimization, natural language assistant, event discovery, computer vision hazard analysis, and emergency response.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

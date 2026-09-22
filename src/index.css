@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  --color-tertiary: #006947;
+  --color-on-error-container: #93000a;
+  --color-secondary-fixed-dim: #4cd7f6;
+  --color-on-tertiary-fixed-variant: #005236;
+  --color-surface-bright: #faf8ff;
+  --color-on-tertiary-container: #f5fff6;
+  --color-on-tertiary-fixed: #002113;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-secondary-fixed-variant: #004e5c;
+  --color-secondary: #00687a;
+  --color-tertiary-fixed: #6ffbbe;
+  --color-on-secondary-container: #006172;
+  --color-tertiary-container: #00855b;
+  --color-on-primary-fixed-variant: #004b73;
+  --color-surface-container: #eaedff;
+  --color-error: #ba1a1a;
+  --color-on-primary-fixed: #001d31;
+  --color-on-surface-variant: #3f4850;
+  --color-on-surface: #131b2e;
+  --color-inverse-on-surface: #eef0ff;
+  --color-surface-variant: #dae2fd;
+  --color-surface-container-high: #e2e7ff;
+  --color-surface-tint: #006398;
+  --color-outline: #707881;
+  --color-primary-fixed: #cce5ff;
+  --color-on-primary: #ffffff;
+  --color-on-secondary: #ffffff;
+  --color-inverse-surface: #283044;
+  --color-primary: #006194;
+  --color-background: #faf8ff;
+  --color-on-primary-container: #fdfcff;
+  --color-on-error: #ffffff;
+  --color-surface-dim: #d2d9f4;
+  --color-on-secondary-fixed: #001f26;
+  --color-inverse-primary: #93ccff;
+  --color-tertiary-fixed-dim: #4edea3;
+  --color-secondary-fixed: #acedff;
+  --color-outline-variant: #bfc7d2;
+  --color-secondary-container: #57dffe;
+  --color-on-background: #131b2e;
+  --color-surface-container-highest: #dae2fd;
+  --color-primary-fixed-dim: #93ccff;
+  --color-surface: #faf8ff;
+  --color-error-container: #ffdad6;
+  --color-on-tertiary: #ffffff;
+  --color-surface-container-low: #f2f3ff;
+  --color-primary-container: #007bb9;
+
+  --font-headline-lg-mobile: "Plus Jakarta Sans", sans-serif;
+  --font-headline-sm: "Plus Jakarta Sans", sans-serif;
+  --font-headline-md: "Plus Jakarta Sans", sans-serif;
+  --font-headline-lg: "Plus Jakarta Sans", sans-serif;
+  --font-display: "Plus Jakarta Sans", sans-serif;
+  --font-display-mobile: "Plus Jakarta Sans", sans-serif;
+
+  --font-body-md: "Inter", sans-serif;
+  --font-body-sm: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-label-sm: "Inter", sans-serif;
+  --font-label-md: "Inter", sans-serif;
+  --font-code-telemetry: "Inter", monospace;
+
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 0.75rem;
+  --spacing-space-lg: 1rem;
+  --spacing-space-xl: 1.5rem;
+  --spacing-gutter: 1rem;
+  --spacing-gutter-lg: 1.5rem;
+  --spacing-margin: 1rem;
+  --spacing-margin-md: 1.5rem;
+  --spacing-margin-lg: 2.5rem;
+}
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-body-md);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Custom scrollbar hiding utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
