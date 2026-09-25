@@ -143,9 +143,18 @@ export interface RouteResult {
   };
 }
 
+export type EmergencyCategory =
+  | 'Fire'
+  | 'Medical Emergency'
+  | 'Flood'
+  | 'Blocked Road'
+  | 'Overcrowding'
+  | 'Power Failure'
+  | 'Security Alert';
+
 export interface EmergencyIncident {
   id: string;
-  type: 'Fire' | 'Medical Emergency' | 'Flood' | 'Blocked Road' | 'Overcrowding' | 'Power Failure' | 'Security Alert';
+  type: EmergencyCategory;
   title: string;
   description: string;
   location: string;
@@ -162,13 +171,16 @@ export interface VisionAnalysis {
   id: string;
   detection: string;
   category: 'Fire' | 'Flood' | 'Crowd' | 'Blocked road' | 'Infrastructure damage' | 'Normal condition';
-  confidence: number; // 0 - 100
+  confidence: number; // 0 - 100 or 0 - 1
   location: string;
   recommendedAction: string;
   severity: 'normal' | 'warning' | 'danger';
   sampleImage?: string;
   timestamp: string;
   blockedEdgeIds?: string[];
+  hazardDetected?: boolean;
+  detectedIssue?: string;
+  affectedPath?: string;
 }
 
 export interface CampusTelemetry {
@@ -192,7 +204,7 @@ export interface ChatMessage {
   senderName?: string;
   badge?: string;
   smartCard?: {
-    type: 'EVENT_PATH' | 'VENUE_PATH' | 'ACOUSTIC_TELEMETRY' | 'EMERGENCY_DIRECTIVE';
+    type: 'EVENT_PATH' | 'VENUE_PATH' | 'ACOUSTIC_TELEMETRY' | 'EMERGENCY_DIRECTIVE' | 'FACILITY_DIRECT' | 'NAVIGATION_ROUTE' | 'TACTICAL_HUD';
     title: string;
     badgeText: string;
     destinationName: string;

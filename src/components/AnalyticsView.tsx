@@ -1,7 +1,7 @@
 /**
  * CampusPilot Campus Analytics Dashboard
- * Visualizes crowd density, hourly campus traffic, popular destination distribution,
- * incident resolution logs, and event attendance telemetry.
+ * Visualizes Marwadi University crowd density, hourly campus traffic,
+ * popular destination distribution, incident resolution logs, and event attendance telemetry.
  */
 
 import React from 'react';
@@ -11,21 +11,21 @@ export const AnalyticsView: React.FC = () => {
   const { telemetry, isEmergencyActive } = useCampus();
 
   const hourlyTraffic = [
-    { hour: '8 AM', density: 35 },
-    { hour: '10 AM', density: 68 },
-    { hour: '12 PM', density: 88 },
-    { hour: '2 PM', density: 74 },
-    { hour: '4 PM', density: 82 },
-    { hour: '6 PM', density: 55 },
-    { hour: '8 PM', density: 30 },
+    { hour: '8 AM', density: 32 },
+    { hour: '10 AM', density: 72 },
+    { hour: '12 PM', density: 92 },
+    { hour: '2 PM', density: 78 },
+    { hour: '4 PM', density: 85 },
+    { hour: '6 PM', density: 50 },
+    { hour: '8 PM', density: 28 },
   ];
 
   const popularDestinations = [
-    { name: 'Central Library', share: 34, color: 'bg-primary' },
-    { name: 'Alan Turing Complex', share: 26, color: 'bg-secondary' },
-    { name: 'Student Cafeteria', share: 22, color: 'bg-tertiary' },
-    { name: 'Sports Complex', share: 12, color: 'bg-amber-600' },
-    { name: 'Administration', share: 6, color: 'bg-slate-500' },
+    { name: 'MU Central Knowledge Resource Center', share: 36, color: 'bg-primary' },
+    { name: 'Faculty of Engineering (FOE Block)', share: 28, color: 'bg-secondary' },
+    { name: 'University Food Court & Amul Hub', share: 20, color: 'bg-tertiary' },
+    { name: 'Marwadi Sports Complex & Indoor Arena', share: 10, color: 'bg-amber-600' },
+    { name: 'Main Admin Building & Auditorium', share: 6, color: 'bg-slate-500' },
   ];
 
   return (
@@ -35,39 +35,39 @@ export const AnalyticsView: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
             <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
-              Active Campus Users
+              Active Scholars On Campus
             </span>
             <span className="font-headline-sm text-2xl font-bold text-on-surface">
               {telemetry.activeUsers.toLocaleString()}
             </span>
-            <span className="text-xs text-tertiary font-bold mt-1 block">↑ 12% vs last week</span>
+            <span className="text-xs text-tertiary font-bold mt-1 block">↑ 14% vs last week</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
             <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
-              Average Crowd Density
+              Average Quad Density
             </span>
             <span className="font-headline-sm text-2xl font-bold text-secondary">
               {telemetry.crowdDensityPercent}%
             </span>
-            <span className="text-xs text-secondary font-semibold mt-1 block">Normal Flow</span>
+            <span className="text-xs text-secondary font-semibold mt-1 block">Smooth Movement</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
             <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
-              Library Vacant Desks
+              Central Library Vacancy
             </span>
             <span className="font-headline-sm text-2xl font-bold text-tertiary">
-              {telemetry.openDesksInLibrary}
+              {telemetry.openDesksInLibrary} Desks
             </span>
             <span className="text-xs text-tertiary font-bold mt-1 block">
-              {telemetry.libraryNoiseDb} dB (Acoustic Good)
+              {telemetry.libraryNoiseDb} dB (Acoustic Optimal)
             </span>
           </div>
 
           <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
             <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
-              System Health & Ping
+              Spatial Ping Latency
             </span>
             <span className="font-headline-sm text-2xl font-bold text-on-surface">
               {telemetry.meshLatencyMs} ms
@@ -81,14 +81,14 @@ export const AnalyticsView: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-headline-sm text-base font-bold text-on-surface">
-                Hourly Pedestrian Traffic & Quad Density
+                Hourly Pedestrian Traffic & Quad Density (Marwadi University)
               </h3>
               <p className="font-body-sm text-xs text-on-surface-variant">
-                Live sensor aggregation from Pine Avenue & Quad B
+                Live sensor aggregation from University Spine Boulevard & Central Quad
               </p>
             </div>
             <span className="font-code-telemetry text-xs text-secondary font-bold">
-              Peak: 12:00 PM – 1:30 PM
+              Peak: 12:30 PM – 1:30 PM
             </span>
           </div>
 
@@ -120,15 +120,15 @@ export const AnalyticsView: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-5 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
             <h3 className="font-headline-sm text-base font-bold text-on-surface mb-3">
-              Popular Campus Destinations
+              Popular Marwadi University Destinations
             </h3>
 
             <div className="space-y-3">
               {popularDestinations.map((dest) => (
                 <div key={dest.name}>
                   <div className="flex items-center justify-between text-xs font-medium mb-1">
-                    <span className="text-on-surface">{dest.name}</span>
-                    <span className="font-code-telemetry text-on-surface-variant font-bold">
+                    <span className="text-on-surface truncate">{dest.name}</span>
+                    <span className="font-code-telemetry text-on-surface-variant font-bold ml-2">
                       {dest.share}%
                     </span>
                   </div>
@@ -154,19 +154,19 @@ export const AnalyticsView: React.FC = () => {
 
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
                 <span>CCTV Optical Flow Coverage</span>
-                <span className="font-bold text-on-surface">94.2% Campus Corridors</span>
+                <span className="font-bold text-on-surface">96.4% Campus Corridors</span>
               </div>
 
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
-                <span>Corridor 2B Obstruction Status</span>
-                <span className={`font-bold ${isEmergencyActive ? 'text-error animate-pulse' : 'text-tertiary'}`}>
-                  {isEmergencyActive ? 'Code Orange Bypass Active' : 'Normal Conditions'}
+                <span>Highway Gate 1 Access Status</span>
+                <span className="font-bold text-tertiary">Clear • Rapid Evacuation Path Ready</span>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
+                <span>Active Safety Status</span>
+                <span className={`font-bold ${isEmergencyActive ? 'text-error' : 'text-tertiary'}`}>
+                  {isEmergencyActive ? 'Code Orange Alert (FOE Block)' : 'Normal Operations (Green)'}
                 </span>
-              </div>
-
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low">
-                <span>Avg Navigation Time Saved</span>
-                <span className="font-bold text-secondary">3.8 mins / trip</span>
               </div>
             </div>
           </div>

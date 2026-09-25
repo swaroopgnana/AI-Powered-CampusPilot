@@ -1,7 +1,6 @@
 /**
  * CampusPilot Student Profile & Preferences View
- * Manages user credentials, accessible routing flags, saved locations,
- * emergency contacts, and interactive scenario demo triggers.
+ * Configured for Marwadi University Student Context
  */
 
 import React from 'react';
@@ -17,6 +16,7 @@ import {
   Flame,
   CheckCircle,
   Compass,
+  Radio,
 } from 'lucide-react';
 
 export const ProfileView: React.FC = () => {
@@ -60,10 +60,10 @@ export const ProfileView: React.FC = () => {
               </span>
             </div>
             <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
-              {userProfile.department} • {userProfile.year}
+              {userProfile.department} • {userProfile.year} • Marwadi University
             </p>
             <p className="font-code-telemetry text-xs text-on-surface-variant mt-0.5">
-              ID: {userProfile.studentId}
+              Enrollment ID: {userProfile.studentId}
             </p>
           </div>
         </div>
@@ -74,16 +74,16 @@ export const ProfileView: React.FC = () => {
             <div className="flex items-center gap-2">
               <Sliders className="w-5 h-5 text-secondary flex-shrink-0" />
               <h3 className="font-headline-sm text-sm sm:text-base font-bold text-on-surface">
-                CampusPilot Interactive Demo Scenarios
+                Marwadi University Digital Twin Simulation Controls
               </h3>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold">
-              Demo Switcher
+            <span className="px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800 text-xs font-bold">
+              Digital Twin Sandbox
             </span>
           </div>
 
           <p className="font-body-sm text-xs text-on-surface-variant leading-relaxed">
-            Quickly trigger predefined campus simulation states to test routing algorithms, computer vision, and evacuation protocols.
+            Quickly trigger predefined university scenarios to test spatial routing algorithms, computer vision optical flow, and emergency evacuation protocols.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
@@ -94,11 +94,11 @@ export const ProfileView: React.FC = () => {
               <div className="flex items-center gap-1.5 mb-0.5">
                 <Compass className="w-4 h-4 text-primary" />
                 <span className="font-label-md font-bold text-primary text-xs sm:text-sm">
-                  1. Workshop Nav
+                  1. AI Summit Nav
                 </span>
               </div>
               <span className="text-xs text-on-surface-variant block">
-                Routes to Turing Room 302 via A* Heuristic
+                Routes to FOE Lab 312 via A* Heuristic
               </span>
             </button>
 
@@ -109,11 +109,11 @@ export const ProfileView: React.FC = () => {
               <div className="flex items-center gap-1.5 mb-0.5">
                 <Flame className="w-4 h-4 text-error" />
                 <span className="font-label-md font-bold text-error text-xs sm:text-sm">
-                  2. Evac Corridor 2B
+                  2. Evac FOE Corridor 2B
                 </span>
               </div>
               <span className="text-xs text-red-300 block">
-                Code Orange • Blocks path & opens North Evac
+                Code Orange • Reroutes to Highway Gate 1
               </span>
             </button>
 
@@ -128,7 +128,7 @@ export const ProfileView: React.FC = () => {
                 </span>
               </div>
               <span className="text-xs text-on-surface-variant block">
-                Resets hazards & telemetry to standard
+                Clears alerts & telemetry to normal
               </span>
             </button>
           </div>
@@ -137,7 +137,7 @@ export const ProfileView: React.FC = () => {
         {/* Routing Engine Preferences */}
         <div className="p-5 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs space-y-4">
           <h3 className="font-headline-sm text-sm sm:text-base font-bold text-on-surface">
-            Navigation & Routing Engine Preferences
+            Navigation & Digital Twin Routing Engine Preferences
           </h3>
 
           <div className="space-y-3">
@@ -164,92 +164,94 @@ export const ProfileView: React.FC = () => {
 
             <div>
               <label className="font-label-sm text-xs text-on-surface-variant block mb-1">
-                Preferred Route Metric
+                Default Path Preference
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {(['SAFEST', 'FASTEST', 'ACCESSIBLE'] as RoutePreference[]).map((pref) => (
+                {(
+                  [
+                    { id: 'SAFEST', label: 'Safest (CCTV)' },
+                    { id: 'FASTEST', label: 'Fastest Direct' },
+                    { id: 'ACCESSIBLE', label: 'Accessible (Ramps)' },
+                  ] as { id: RoutePreference; label: string }[]
+                ).map((pref) => (
                   <button
-                    key={pref}
-                    onClick={() => setActivePreference(pref)}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      activePreference === pref
+                    key={pref.id}
+                    onClick={() => setActivePreference(pref.id)}
+                    className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer truncate ${
+                      activePreference === pref.id
                         ? 'bg-secondary text-on-secondary shadow-xs'
                         : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
                     }`}
                   >
-                    {pref}
+                    {pref.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Accessibility step-free toggle */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container-low">
-              <div className="flex items-center gap-2.5">
-                <Accessibility className="w-5 h-5 text-secondary flex-shrink-0" />
+            <div className="pt-2 border-t border-surface-container flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Accessibility className="w-5 h-5 text-on-surface-variant" />
                 <div>
                   <span className="font-label-md text-xs sm:text-sm font-semibold text-on-surface block">
                     Strict Accessibility Mode
                   </span>
-                  <span className="text-[11px] sm:text-xs text-on-surface-variant">
-                    Require step-free routes, elevators, and automatic doors only
+                  <span className="font-body-sm text-xs text-on-surface-variant">
+                    Always avoid stairs, narrow paths, or stepped elevations across campus
                   </span>
                 </div>
               </div>
               <input
                 type="checkbox"
                 checked={userProfile.accessibleOnly}
-                onChange={(e) => {
-                  updateUserProfile({ accessibleOnly: e.target.checked });
-                  if (e.target.checked) setActivePreference('ACCESSIBLE');
-                }}
-                className="w-5 h-5 accent-secondary cursor-pointer"
-              />
-            </div>
-
-            {/* Voice Guidance Toggle */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container-low">
-              <div className="flex items-center gap-2.5">
-                <Volume2 className="w-5 h-5 text-tertiary flex-shrink-0" />
-                <div>
-                  <span className="font-label-md text-xs sm:text-sm font-semibold text-on-surface block">
-                    Turn-by-Turn Audio Prompts
-                  </span>
-                  <span className="text-[11px] sm:text-xs text-on-surface-variant">
-                    Speak upcoming direction milestones through headset
-                  </span>
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                checked={userProfile.voiceGuidance}
-                onChange={(e) => updateUserProfile({ voiceGuidance: e.target.checked })}
-                className="w-5 h-5 accent-tertiary cursor-pointer"
+                onChange={(e) => updateUserProfile({ accessibleOnly: e.target.checked })}
+                className="w-5 h-5 rounded accent-primary cursor-pointer"
               />
             </div>
           </div>
         </div>
 
-        {/* Saved Locations */}
-        <div className="p-5 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs space-y-3">
-          <h3 className="font-headline-sm text-sm sm:text-base font-bold text-on-surface">
-            Saved Favorite Locations
+        {/* Saved University Bookmarks */}
+        <div className="p-5 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
+          <h3 className="font-headline-sm text-sm sm:text-base font-bold text-on-surface mb-3 flex items-center gap-2">
+            <Bookmark className="w-4 h-4 text-primary" />
+            <span>Saved Marwadi University Locations</span>
           </h3>
+
           <div className="space-y-2">
             {userProfile.savedLocations.map((loc) => (
-              <button
+              <div
                 key={loc.id}
                 onClick={() => handleSavedLocationClick(loc.buildingId)}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors text-left cursor-pointer"
+                className="p-3 rounded-xl bg-surface-container-low hover:bg-surface-container border border-surface-container flex items-center justify-between cursor-pointer transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <Bookmark className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="font-label-md text-xs sm:text-sm font-medium text-on-surface">
-                    {loc.name}
-                  </span>
+                <span className="text-xs font-bold text-on-surface">{loc.name}</span>
+                <ChevronRight className="w-4 h-4 text-on-surface-variant" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Emergency Contacts */}
+        <div className="p-5 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
+          <h3 className="font-headline-sm text-sm sm:text-base font-bold text-on-surface mb-3">
+            Campus Emergency Contacts
+          </h3>
+
+          <div className="space-y-2.5">
+            {userProfile.emergencyContacts.map((contact, i) => (
+              <div
+                key={i}
+                className="p-3 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-between"
+              >
+                <div>
+                  <span className="text-xs font-bold text-on-surface block">{contact.name}</span>
+                  <span className="text-[11px] text-on-surface-variant">{contact.role}</span>
                 </div>
-                <ChevronRight className="w-4 h-4 text-on-surface-variant flex-shrink-0" />
-              </button>
+                <span className="font-code-telemetry text-xs font-bold text-primary">
+                  {contact.number}
+                </span>
+              </div>
             ))}
           </div>
         </div>

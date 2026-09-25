@@ -1,6 +1,6 @@
 /**
  * CampusPilot Desktop Sidebar Navigation
- * Matches Stitch styling for larger desktop viewports
+ * Branded for Marwadi University Digital Twin System
  */
 
 import React from 'react';
@@ -16,11 +16,11 @@ import {
   BarChart3,
   User,
   ShieldAlert,
-  Siren,
+  Radio,
 } from 'lucide-react';
 
 export const SidebarNav: React.FC = () => {
-  const { activeScreen, setActiveScreen, isEmergencyActive, triggerEmergency } = useCampus();
+  const { activeScreen, setActiveScreen, isEmergencyActive } = useCampus();
 
   const navItems: {
     id: ScreenId;
@@ -28,10 +28,10 @@ export const SidebarNav: React.FC = () => {
     icon: React.ComponentType<{ className?: string }>;
     badge?: string;
   }[] = [
-    { id: 'home', label: 'Campus Dashboard', icon: LayoutDashboard },
-    { id: 'assistant', label: 'Neural AI Assist', icon: Bot, badge: 'v4.2' },
-    { id: 'map', label: '3D Digital Twin Map', icon: Compass },
-    { id: 'events', label: 'Events & Workshops', icon: Calendar, badge: '8 Live' },
+    { id: 'home', label: 'MU Dashboard', icon: LayoutDashboard },
+    { id: 'assistant', label: 'Neural AI Assist', icon: Bot, badge: 'MU AI' },
+    { id: 'map', label: '3D Digital Twin Map', icon: Compass, badge: 'Live Twin' },
+    { id: 'events', label: 'Summits & Events', icon: Calendar, badge: '5 Live' },
     { id: 'facilities', label: 'Campus Facilities', icon: Building2 },
     { id: 'emergency', label: 'Emergency Evacuation', icon: AlertTriangle, badge: isEmergencyActive ? 'Alert' : undefined },
     { id: 'analytics', label: 'Campus Pulse Analytics', icon: BarChart3 },
@@ -41,9 +41,13 @@ export const SidebarNav: React.FC = () => {
   return (
     <aside className="hidden md:flex flex-col flex-shrink-0 w-64 h-full bg-surface-container-low border-r border-surface-container-high/60 p-space-md justify-between select-none">
       <div className="flex flex-col gap-space-sm">
-        <div className="px-2 py-1 mb-1">
+        <div className="px-2 py-1 mb-1 flex items-center justify-between">
           <span className="font-code-telemetry text-code-telemetry text-on-surface-variant uppercase tracking-wider text-[11px] font-semibold">
-            Navigation Menu
+            Marwadi University
+          </span>
+          <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Online
           </span>
         </div>
 
@@ -72,6 +76,8 @@ export const SidebarNav: React.FC = () => {
                         ? 'bg-primary-container text-on-primary-container'
                         : item.id === 'emergency'
                         ? 'bg-error text-on-error animate-pulse'
+                        : item.id === 'map'
+                        ? 'bg-cyan-100 text-cyan-800'
                         : 'bg-surface-container-high text-secondary'
                     }`}
                   >
@@ -94,17 +100,13 @@ export const SidebarNav: React.FC = () => {
           <span className="w-2 h-2 rounded-full bg-error animate-ping"></span>
         </div>
         <p className="font-body-sm text-xs text-on-surface-variant leading-relaxed">
-          Campus Police & First-Aid responders on live alert.
+          MU Campus Security & Highway Gate Triage responders on standby.
         </p>
         <button
-          onClick={() => {
-            triggerEmergency('Fire');
-            setActiveScreen('emergency');
-          }}
-          className="w-full py-2 px-3 rounded-lg bg-error hover:bg-error/90 text-on-error font-label-md text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+          onClick={() => setActiveScreen('emergency')}
+          className="w-full py-2 px-3 rounded-lg bg-error hover:bg-error/95 text-on-error text-xs font-bold transition-colors active:scale-95 cursor-pointer shadow-2xs"
         >
-          <Siren className="w-4 h-4" />
-          <span>Activate SOS Routine</span>
+          Open Tactical Evacuation HUD
         </button>
       </div>
     </aside>

@@ -1,7 +1,6 @@
 /**
  * CampusPilot Central Application State Context
- * Manages routing, user location, graph recalculations, active emergency state,
- * AI chat history, notifications, and demo scenarios.
+ * Configured for Marwadi University Digital Twin System
  */
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
@@ -14,6 +13,7 @@ import {
   RoutePreference,
   RouteResult,
   EmergencyIncident,
+  EmergencyCategory,
   CampusTelemetry,
   ChatMessage,
   UserProfile,
@@ -75,7 +75,7 @@ interface CampusContextType {
   setIsEmergencyActive: (active: boolean) => void;
   activeIncident: EmergencyIncident | null;
   setActiveIncident: (inc: EmergencyIncident | null) => void;
-  triggerEmergency: (category: string) => void;
+  triggerEmergency: (category: EmergencyCategory | string) => void;
   resolveEmergency: () => void;
 
   // Blocked edges
@@ -116,12 +116,12 @@ export const CampusProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [userLocation, setUserLocation] = useState({
     name: 'Zone B - Central Quad',
     nodeId: 'node-user',
-    x: 480,
-    y: 460,
+    x: 470,
+    y: 440,
   });
 
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
-    CAMPUS_BUILDINGS.find((b) => b.id === 'bldg-library') || null
+    CAMPUS_BUILDINGS.find((b) => b.id === 'bldg-library') || CAMPUS_BUILDINGS[0]
   );
   const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CampusEvent | null>(CAMPUS_EVENTS[0]);
@@ -149,134 +149,113 @@ export const CampusProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     {
       id: 'msg-init-1',
       sender: 'assistant',
-      timestamp: '10:41 AM • Neural Routing Agent',
-      text: "Hi Swaroop! I'm CampusPilot AI. I can help you navigate the university campus, locate ongoing workshops, check lab availability, and guide you during emergency situations.",
+      timestamp: '10:41 AM • MU Neural Routing Agent',
+      text: "Hello Swaroop! I'm CampusPilot AI for Marwadi University. I can guide you through the 3D digital twin, pinpoint academic blocks, find live summits in FOE & Central Library, locate quiet study carrels, and navigate safely during emergency scenarios.",
     },
     {
       id: 'msg-init-2',
       sender: 'user',
       timestamp: '10:42 AM • Sent',
-      text: "Where is today's AI & Machine Learning workshop, and what is the fastest route from here?",
+      text: "Where is today's Marwadi AI Summit, and what is the safest route from Central Quad?",
     },
     {
       id: 'msg-init-3',
       sender: 'assistant',
       timestamp: '10:42 AM • Spatial Vector Computed',
-      text: '',
+      text: "The Marwadi AI Summit is taking place right now at the Faculty of Engineering & Technology (FOE Block), Lab 312 & Seminar Hall (2:30 PM – 5:00 PM). Here is your verified route:",
       smartCard: {
         type: 'EVENT_PATH',
-        title: 'AI & Machine Learning Workshop',
+        title: 'Marwadi AI Summit: Agentic Workflows & Digital Twins',
         badgeText: 'Live Now',
-        destinationName: 'Alan Turing Academic Complex',
-        destinationDetail: 'Room 302 (North Wing, 3rd Floor)',
-        distance: '720 m',
-        estWalk: '9 mins',
-        optimizer: 'A* Shortest',
-        campusPathBadge: 'Safe • Low crowd',
+        destinationName: 'Faculty of Engineering (FOE Block)',
+        destinationDetail: 'Lab 312 & Seminar Hall • 620m away',
+        distance: '620 m',
+        estWalk: '7 mins',
+        optimizer: 'A* Heuristic (Safety First)',
+        campusPathBadge: 'CCTV Verified • Safe Promenade',
         waypoints: {
-          origin: 'Current: Zone B',
-          via: 'Pine Ave',
-          dest: 'Turing Cmplx',
+          origin: 'Central Quad',
+          via: 'Spine Blvd',
+          dest: 'FOE Block',
         },
         eventData: CAMPUS_EVENTS[0],
-        buildingId: 'bldg-turing',
+        buildingId: 'bldg-engg',
       },
-    },
-    {
-      id: 'msg-init-4',
-      sender: 'user',
-      timestamp: '10:44 AM • Sent',
-      text: 'Is the library quiet right now?',
-    },
-    {
-      id: 'msg-init-5',
-      sender: 'assistant',
-      timestamp: '10:44 AM • IoT Sensor Stream',
-      text: 'Yes! Central Library 2nd & 3rd floors currently have 78% quiet zone vacancy. Cafe on 1st floor has moderate queue (~6 mins).',
     },
   ]);
 
   const [notifications, setNotifications] = useState<CampusNotification[]>([
     {
       id: 'notif-1',
-      title: 'AI Workshop Starts in 25 min',
-      body: 'Room 302 Turing Academic Complex. Seat allocation confirmed.',
-      timestamp: '5m ago',
+      title: 'Marwadi AI Summit in Session',
+      body: 'Hands-on generative agent workshop is currently underway at FOE Block Room 312.',
+      timestamp: '12m ago',
       type: 'event',
       unread: true,
     },
     {
       id: 'notif-2',
-      title: 'Corridor 2B Electrical Surge Hazard',
-      body: 'Code Orange active. Tactical rerouting active for zone Sector 4.',
-      timestamp: '12m ago',
+      title: 'Corridor 2B Hazard Rerouting',
+      body: 'Engineering Block Corridor 2B is under maintenance. Safest bypass via University Spine Boulevard.',
+      timestamp: '25m ago',
       type: 'hazard',
       unread: true,
     },
     {
       id: 'notif-3',
-      title: 'East Walkway Maintenance',
-      body: 'Maintenance underway until 4:00 PM. Follow green arrows.',
+      title: 'Digital Library Quiet Vacancy High',
+      body: 'Floors 2 & 3 have 76% quiet vacancy. Ideal study conditions detected by acoustic sensors.',
       timestamp: '1h ago',
-      type: 'navigation',
+      type: 'system',
       unread: false,
     },
   ]);
 
-  // Graph instance memoized
+  // Graph Engine Instance
   const graphService = useMemo(() => {
     return new CampusGraphService(CAMPUS_NODES, CAMPUS_EDGES);
   }, []);
 
-  // Compute route whenever destination, preference, algorithm, or blocked edges change
-  const currentRoute = useMemo(() => {
-    // Target destination node
+  // Recalculate route whenever target, algorithm, preference or blocked edges change
+  const currentRoute = useMemo<RouteResult | null>(() => {
     let targetNodeId = 'node-lib-east';
 
-    if (isEmergencyActive && activeIncident) {
+    if (isEmergencyActive) {
       targetNodeId = 'node-northgate-safe';
     } else if (selectedBuilding) {
-      if (selectedBuilding.id === 'bldg-turing') targetNodeId = 'node-turing-entrance';
-      else if (selectedBuilding.id === 'bldg-admin') targetNodeId = 'node-admin-entrance';
-      else if (selectedBuilding.id === 'bldg-science') targetNodeId = 'node-science-entrance';
-      else if (selectedBuilding.id === 'bldg-cafeteria') targetNodeId = 'node-cafe-entrance';
-      else if (selectedBuilding.id === 'bldg-sports') targetNodeId = 'node-sports-entrance';
-      else if (selectedBuilding.id === 'bldg-northgate') targetNodeId = 'node-northgate-safe';
-      else targetNodeId = 'node-lib-east';
+      const matchNode = CAMPUS_NODES.find((n) => n.buildingId === selectedBuilding.id);
+      if (matchNode) {
+        targetNodeId = matchNode.id;
+      }
     }
 
     return graphService.findRoute(userLocation.nodeId, targetNodeId, {
-      preference: activePreference,
       algorithm: activeAlgorithm,
+      preference: isEmergencyActive ? 'SAFEST' : activePreference,
       emergencyActive: isEmergencyActive,
       customBlockedEdgeIds: blockedEdgeIds,
     });
   }, [
     userLocation.nodeId,
     selectedBuilding,
-    activePreference,
     activeAlgorithm,
-    isEmergencyActive,
-    activeIncident,
+    activePreference,
     blockedEdgeIds,
+    isEmergencyActive,
     graphService,
   ]);
 
   const calculateRouteTo = (
     targetNodeId: string,
-    pref: RoutePreference = activePreference,
-    algo: RouteOptimizer = activeAlgorithm
+    pref?: RoutePreference,
+    algo?: RouteOptimizer
   ): RouteResult | null => {
     return graphService.findRoute(userLocation.nodeId, targetNodeId, {
-      preference: pref,
-      algorithm: algo,
+      algorithm: algo || activeAlgorithm,
+      preference: pref || activePreference,
       emergencyActive: isEmergencyActive,
       customBlockedEdgeIds: blockedEdgeIds,
     });
-  };
-
-  const addChatMessage = (msg: ChatMessage) => {
-    setChatMessages((prev) => [...prev, msg]);
   };
 
   const blockEdge = (edgeId: string) => {
@@ -287,29 +266,37 @@ export const CampusProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setBlockedEdgeIds((prev) => prev.filter((id) => id !== edgeId));
   };
 
-  const triggerEmergency = (category: string) => {
+  const triggerEmergency = (category: EmergencyCategory | string) => {
     setIsEmergencyActive(true);
-    const newInc: EmergencyIncident = {
+    const validCategory = (category as EmergencyCategory) || 'Fire';
+    const incident: EmergencyIncident = {
       id: 'inc-' + Date.now(),
-      type: (category as any) || 'Fire',
-      title: `${category} Incident Reported`,
-      description: `Rapid sensor trip and verified report in Sector 4. Evacuation protocol active.`,
-      location: 'Engineering Block - Level 2',
-      buildingId: 'bldg-turing',
+      type: validCategory,
+      title: `${category.toUpperCase()} ALERT: Hazard Active in Engineering FOE Block`,
+      description: `Thermal and optical IoT camera detectors triggered in Faculty of Engineering Block Level 2 corridor. Automated emergency protocol initiated.`,
+      location: 'Faculty of Engineering (FOE Block) - Level 2',
+      buildingId: 'bldg-engg',
       severity: 'High',
       status: 'Active',
       timestamp: 'Just now',
-      affectedPathIds: ['edge-user-west', 'edge-west-turing'],
+      affectedPathIds: ['edge-user-west', 'edge-west-engg', 'edge-west-admin'],
       recommendedSafeZoneId: 'bldg-northgate',
-      recommendedDirective: 'Evacuate toward North Gate Safe Zone via central open lawn.',
+      recommendedDirective:
+        'Evacuate toward Main Highway Gate 1 Safe Assembly Lawn 1 via Central Spine Boulevard. Engineering Corridor 2B is completely sealed off.',
     };
-    setActiveIncident(newInc);
-    setBlockedEdgeIds(['edge-user-west', 'edge-west-turing']);
+    setActiveIncident(incident);
+    setBlockedEdgeIds(incident.affectedPathIds);
+
+    const safeBldg = CAMPUS_BUILDINGS.find((b) => b.id === 'bldg-northgate');
+    if (safeBldg) {
+      setSelectedBuilding(safeBldg);
+    }
+
     setNotifications((prev) => [
       {
-        id: 'notif-sos-' + Date.now(),
-        title: `EMERGENCY ALERT: ${category}`,
-        body: 'Tactical evacuation route generated. Proceed to North Gate Safe Zone.',
+        id: 'notif-emerg-' + Date.now(),
+        title: `CRITICAL: ${category} Alert Active`,
+        body: 'Tactical evacuation route toward Highway Gate 1 Safe Zone is now displayed on your 3D Digital Twin HUD.',
         timestamp: 'Just now',
         type: 'hazard',
         unread: true,
@@ -322,10 +309,16 @@ export const CampusProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setIsEmergencyActive(false);
     setActiveIncident(null);
     setBlockedEdgeIds([]);
+    const libBldg = CAMPUS_BUILDINGS.find((b) => b.id === 'bldg-library');
+    if (libBldg) setSelectedBuilding(libBldg);
   };
 
-  const updateUserProfile = (patch: Partial<UserProfile>) => {
-    setUserProfile((prev) => ({ ...prev, ...patch }));
+  const addChatMessage = (msg: ChatMessage) => {
+    setChatMessages((prev) => [...prev, msg]);
+  };
+
+  const updateUserProfile = (p: Partial<UserProfile>) => {
+    setUserProfile((prev) => ({ ...prev, ...p }));
   };
 
   const markAllNotificationsRead = () => {
@@ -333,42 +326,56 @@ export const CampusProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const applyVisionFinding = (finding: VisionAnalysis) => {
-    if (finding.blockedEdgeIds && finding.blockedEdgeIds.length > 0) {
-      finding.blockedEdgeIds.forEach((id) => blockEdge(id));
+    if (finding.severity !== 'normal') {
+      blockEdge('edge-user-west');
+      blockEdge('edge-west-engg');
     }
-    setNotifications((prev) => [
-      {
-        id: 'notif-vision-' + Date.now(),
-        title: `AI Vision: ${finding.detection}`,
-        body: `${finding.location}. Action: ${finding.recommendedAction}`,
-        timestamp: 'Just now',
-        type: 'hazard',
-        unread: true,
+
+    addChatMessage({
+      id: 'msg-vision-' + Date.now(),
+      sender: 'assistant',
+      timestamp: `${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Optical AI Scan`,
+      badge: 'Vision Analysis',
+      text: `CV Analysis Verified: ${finding.detection}. Confidence: ${finding.confidence > 1 ? finding.confidence : Math.round(finding.confidence * 100)}%. Recommendation: ${finding.recommendedAction}`,
+      smartCard: {
+        type: 'TACTICAL_HUD',
+        title: `Hazard Verified: ${finding.detection}`,
+        badgeText: 'CV Optical Flow',
+        destinationName: 'Main Highway Gate 1 Safe Zone',
+        destinationDetail: finding.recommendedAction,
+        distance: '480 m',
+        estWalk: '3 mins',
+        optimizer: 'A* Bypass',
+        campusPathBadge: 'Corridor 2B Rerouted',
+        waypoints: {
+          origin: 'Central Quad',
+          via: 'Open Promenade',
+          dest: 'Highway Gate 1',
+        },
+        buildingId: 'bldg-northgate',
       },
-      ...prev,
-    ]);
+    });
   };
 
-  // Demo scenarios implementation
   const runDemoScenario = (scenario: 'workshop' | 'emergency' | 'reset') => {
     if (scenario === 'workshop') {
       setIsEmergencyActive(false);
-      const turing = CAMPUS_BUILDINGS.find((b) => b.id === 'bldg-turing') || null;
-      setSelectedBuilding(turing);
+      setBlockedEdgeIds([]);
+      const enggBldg = CAMPUS_BUILDINGS.find((b) => b.id === 'bldg-engg');
+      if (enggBldg) setSelectedBuilding(enggBldg);
       setSelectedEvent(CAMPUS_EVENTS[0]);
-      setActivePreference('SAFEST');
       setActiveAlgorithm('A*');
+      setActivePreference('SAFEST');
       setActiveScreen('map');
     } else if (scenario === 'emergency') {
-      setIsEmergencyActive(true);
-      setActiveIncident(INITIAL_EMERGENCY);
-      setBlockedEdgeIds(INITIAL_EMERGENCY.affectedPathIds);
+      triggerEmergency('Fire');
       setActiveScreen('emergency');
-    } else {
-      setIsEmergencyActive(false);
-      setActiveIncident(null);
-      setBlockedEdgeIds([]);
-      setSelectedBuilding(CAMPUS_BUILDINGS.find((b) => b.id === 'bldg-library') || null);
+    } else if (scenario === 'reset') {
+      resolveEmergency();
+      setSelectedBuilding(CAMPUS_BUILDINGS.find((b) => b.id === 'bldg-library') || CAMPUS_BUILDINGS[0]);
+      setActiveAlgorithm('A*');
+      setActivePreference('SAFEST');
+      setTelemetry(INITIAL_TELEMETRY);
       setActiveScreen('home');
     }
   };
@@ -425,8 +432,10 @@ export const CampusProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 };
 
-export const useCampus = () => {
-  const ctx = useContext(CampusContext);
-  if (!ctx) throw new Error('useCampus must be used within CampusProvider');
-  return ctx;
+export const useCampus = (): CampusContextType => {
+  const context = useContext(CampusContext);
+  if (!context) {
+    throw new Error('useCampus must be used within a CampusProvider');
+  }
+  return context;
 };

@@ -1,6 +1,6 @@
 /**
  * CampusPilot Home Dashboard View
- * Preserves the Stitch visual layout and interactive command hub.
+ * Tailored for Marwadi University (MU) Campus
  */
 
 import React, { useState } from 'react';
@@ -14,8 +14,11 @@ import {
   Building2,
   AlertTriangle,
   Layers,
-  Sliders,
   Sparkles,
+  MapPin,
+  Clock,
+  Radio,
+  ScanLine,
 } from 'lucide-react';
 
 export const HomeDashboardView: React.FC = () => {
@@ -27,8 +30,7 @@ export const HomeDashboardView: React.FC = () => {
     telemetry,
     userProfile,
     isEmergencyActive,
-    runDemoScenario,
-    triggerEmergency,
+    setIsVisionModalOpen,
   } = useCampus();
 
   const [commandQuery, setCommandQuery] = useState('');
@@ -37,7 +39,6 @@ export const HomeDashboardView: React.FC = () => {
     e.preventDefault();
     if (!commandQuery.trim()) return;
 
-    // Send query to AI Assist
     addChatMessage({
       id: 'msg-cmd-' + Date.now(),
       sender: 'user',
@@ -48,7 +49,7 @@ export const HomeDashboardView: React.FC = () => {
     setActiveScreen('assistant');
   };
 
-  const nextEvent = CAMPUS_EVENTS[0]; // AI & Machine Learning Workshop
+  const nextEvent = CAMPUS_EVENTS[0]; // Marwadi AI Summit
 
   const handleNavigateNextEvent = () => {
     setSelectedEvent(nextEvent);
@@ -60,10 +61,11 @@ export const HomeDashboardView: React.FC = () => {
   };
 
   const promptChips = [
-    'Take me to the library',
-    'AI Workshop venue?',
-    'Nearest cafeteria',
-    'Quiet study pods',
+    'Marwadi AI Summit venue?',
+    'Take me to Central Digital Library',
+    'Where is the Food Court & Amul?',
+    'FOE Block AI Supercomputer Lab',
+    'Emergency safe route to Highway Gate',
   ];
 
   return (
@@ -74,7 +76,7 @@ export const HomeDashboardView: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-headline-sm text-2xl font-bold text-on-surface">
-                Good afternoon, {userProfile.name} 👋
+                Welcome to Marwadi University, {userProfile.name} 👋
               </h1>
             </div>
             <p className="font-body-md text-sm text-on-surface-variant">
@@ -83,7 +85,7 @@ export const HomeDashboardView: React.FC = () => {
           </div>
 
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low border border-surface-container">
-            <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="font-code-telemetry text-xs font-semibold text-on-surface">
               {telemetry.temperature} • {telemetry.weatherCondition}
             </span>
@@ -100,10 +102,10 @@ export const HomeDashboardView: React.FC = () => {
               <AlertTriangle className="w-6 h-6 animate-pulse flex-shrink-0" />
               <div>
                 <span className="font-headline-sm text-sm font-bold block">
-                  Code Orange Active: Corridor 2B Hazard
+                  Code Orange Active: FOE Corridor 2B Electrical Surge Hazard
                 </span>
                 <span className="text-xs opacity-90">
-                  Corridor 2B is obstructed. Tap to view tactical evacuation path.
+                  Engineering Block corridor blocked. Tap to view tactical safe evacuation path to Highway Gate 1.
                 </span>
               </div>
             </div>
@@ -122,7 +124,7 @@ export const HomeDashboardView: React.FC = () => {
               type="text"
               value={commandQuery}
               onChange={(e) => setCommandQuery(e.target.value)}
-              placeholder="Ask anything about campus, buildings, events, quiet study..."
+              placeholder="Ask anything about Marwadi University, FOE labs, Central Library, events..."
               className="w-full h-13 pl-12 pr-12 rounded-2xl bg-transparent text-on-surface placeholder:text-on-surface-variant text-body-md focus:outline-hidden"
             />
             <button
@@ -156,214 +158,147 @@ export const HomeDashboardView: React.FC = () => {
           </div>
         </div>
 
-        {/* "Next Up" Event Card */}
-        <div className="p-5 rounded-3xl bg-linear-to-br from-primary/10 via-surface-container-lowest to-surface-container-low border border-primary/20 shadow-xs relative overflow-hidden">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary text-on-primary uppercase tracking-wider">
-              Next Up • In 25 min
-            </span>
-            <span className="font-code-telemetry text-xs font-bold text-secondary">
-              Starts at 2:30 PM
-            </span>
+        {/* Digital Twin 3D Hero Portal Card */}
+        <div className="p-5 rounded-3xl bg-slate-950 text-white border border-slate-800 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1.5">
+                <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                Live 3D Digital Twin
+              </span>
+              <span className="text-xs text-slate-400 font-mono">
+                Rajkot Campus • Latency 8ms
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-xs font-mono text-emerald-400 font-semibold">Mesh Synchronized</span>
+            </div>
           </div>
 
-          <h3 className="font-headline-sm text-xl font-bold text-on-surface mb-1">
-            {nextEvent.title}
-          </h3>
-          <p className="font-body-md text-sm text-on-surface-variant mb-4">
-            {nextEvent.venue} • {nextEvent.room}
-          </p>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleNavigateNextEvent}
-              className="py-2.5 px-4 rounded-xl bg-primary text-on-primary font-headline-sm font-bold text-sm flex items-center gap-2 shadow-sm active:scale-95 transition-transform cursor-pointer"
-            >
-              <Compass className="w-4 h-4" />
-              <span>Start Safe Navigation</span>
-            </button>
-            <button
-              onClick={() => {
-                setSelectedEvent(nextEvent);
-                setActiveScreen('events');
-              }}
-              className="py-2.5 px-4 rounded-xl border border-surface-container font-bold text-sm text-on-surface hover:bg-surface-container cursor-pointer"
-            >
-              Event Agenda
-            </button>
+          <div className="space-y-1 mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              Interactive Marwadi University 3D Twin & Spatial HUD
+            </h2>
+            <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+              Real-time university spatial model featuring live IoT crowd sensor feeds, CCTV network tracking, safety-aware A* routing, and building digital twins.
+            </p>
           </div>
-        </div>
 
-        {/* Campus Hub 4 Action Tiles */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <button
-            onClick={() => setActiveScreen('map')}
-            className="p-4 rounded-2xl bg-surface-container-lowest hover:bg-surface-container border border-surface-container shadow-xs text-left transition-all active:scale-95 group cursor-pointer"
-          >
-            <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <Compass className="w-5 h-5" />
-            </div>
-            <span className="font-headline-sm text-sm font-bold text-on-surface block">
-              3D Live Map
-            </span>
-            <span className="text-xs text-on-surface-variant">Route Optimization</span>
-          </button>
-
-          <button
-            onClick={() => setActiveScreen('events')}
-            className="p-4 rounded-2xl bg-surface-container-lowest hover:bg-surface-container border border-surface-container shadow-xs text-left transition-all active:scale-95 group cursor-pointer"
-          >
-            <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <Calendar className="w-5 h-5" />
-            </div>
-            <span className="font-headline-sm text-sm font-bold text-on-surface block">
-              Events
-            </span>
-            <span className="text-xs text-on-surface-variant">8 Active on campus</span>
-          </button>
-
-          <button
-            onClick={() => setActiveScreen('facilities')}
-            className="p-4 rounded-2xl bg-surface-container-lowest hover:bg-surface-container border border-surface-container shadow-xs text-left transition-all active:scale-95 group cursor-pointer"
-          >
-            <div className="w-10 h-10 rounded-xl bg-tertiary/15 text-tertiary flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <span className="font-headline-sm text-sm font-bold text-on-surface block">
-              Facilities
-            </span>
-            <span className="text-xs text-on-surface-variant">Labs, Desks & Cafes</span>
-          </button>
-
-          <button
-            onClick={() => {
-              triggerEmergency('Fire');
-              setActiveScreen('emergency');
-            }}
-            className="p-4 rounded-2xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/30 shadow-xs text-left transition-all active:scale-95 group cursor-pointer"
-          >
-            <div className="w-10 h-10 rounded-xl bg-error text-on-error flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <span className="font-headline-sm text-sm font-bold text-error block">
-              Emergency SOS
-            </span>
-            <span className="text-xs text-red-700">Evacuation HUD</span>
-          </button>
-        </div>
-
-        {/* 3D Digital Twin Preview Banner */}
-        <div className="p-5 rounded-3xl bg-surface-container-lowest border border-surface-container shadow-xs relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                <span className="font-code-telemetry text-xs font-bold text-secondary uppercase">
-                  3D Digital Twin Active
-                </span>
-              </div>
-              <h3 className="font-headline-sm text-lg font-bold text-on-surface">
-                Interactive Spatial Campus Explorer
-              </h3>
-              <p className="font-body-md text-xs text-on-surface-variant max-w-md">
-                Isometric buildings, CCTV sensor streams, crowd heatmaps, and wheelchair-accessible paths rendered in real time.
-              </p>
-            </div>
-
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => setActiveScreen('map')}
-              className="py-2.5 px-4 rounded-xl bg-secondary text-on-secondary font-bold text-sm flex items-center gap-2 shadow-sm active:scale-95 transition-transform whitespace-nowrap cursor-pointer"
+              className="py-2.5 px-5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
             >
-              <Layers className="w-4 h-4" />
-              <span>Open 3D Campus Explorer</span>
+              <Compass className="w-4 h-4" />
+              <span>Launch 3D Campus Twin</span>
+            </button>
+
+            <button
+              onClick={() => setIsVisionModalOpen(true)}
+              className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm flex items-center gap-2 border border-slate-700 active:scale-95 transition-all cursor-pointer"
+            >
+              <ScanLine className="w-4 h-4 text-cyan-400" />
+              <span>AI Vision Hazard Inspection</span>
             </button>
           </div>
         </div>
 
-        {/* Live Campus Pulse Telemetry Grid */}
-        <div className="space-y-3">
-          <h3 className="font-headline-sm text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-            Live Campus Pulse Telemetry
-          </h3>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container">
-              <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
-                Crowd Density
+        {/* Next Up Event Card */}
+        <div className="p-5 rounded-3xl bg-linear-to-br from-primary/10 via-surface-container-lowest to-surface-container-low border border-primary/20 shadow-xs relative overflow-hidden">
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/20 text-primary">
+                Featured University Event
               </span>
-              <span className="font-headline-sm text-xl font-bold text-secondary">
-                {telemetry.crowdDensityPercent}%
-              </span>
-              <span className="text-xs text-on-surface-variant block mt-0.5">
-                {telemetry.crowdStatus} Flow
-              </span>
+              <h2 className="font-headline-sm text-lg sm:text-xl font-bold text-on-surface mt-1.5">
+                {nextEvent.title}
+              </h2>
             </div>
+            {nextEvent.isLiveNow && (
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-error text-xs font-bold animate-pulse flex-shrink-0">
+                <span className="w-2 h-2 rounded-full bg-error"></span>
+                Happening Now
+              </span>
+            )}
+          </div>
 
-            <div className="p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container">
-              <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
-                Library Desks
-              </span>
-              <span className="font-headline-sm text-xl font-bold text-tertiary">
-                {telemetry.openDesksInLibrary} Vacant
-              </span>
-              <span className="text-xs text-on-surface-variant block mt-0.5">
-                32 dB Quiet Zone
-              </span>
+          <p className="font-body-md text-sm text-on-surface-variant mb-4 leading-relaxed">
+            {nextEvent.description}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-on-surface-variant mb-4 bg-surface-container-low p-3 rounded-2xl">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-primary" />
+              <span>{nextEvent.timeText}</span>
             </div>
-
-            <div className="p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container">
-              <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
-                Current Quad
-              </span>
-              <span className="font-headline-sm text-base font-bold text-on-surface truncate block">
-                {telemetry.currentZone}
-              </span>
-              <span className="text-xs text-on-surface-variant block mt-0.5">
-                {telemetry.beaconId}
-              </span>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container">
-              <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
-                Campus Weather
-              </span>
-              <span className="font-headline-sm text-xl font-bold text-on-surface">
-                {telemetry.temperature}
-              </span>
-              <span className="text-xs text-on-surface-variant block mt-0.5">
-                {telemetry.weatherCondition}
-              </span>
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-secondary" />
+              <span>{nextEvent.venue} ({nextEvent.room})</span>
             </div>
           </div>
-        </div>
 
-        {/* Demo Scenario Quick Access */}
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-surface-container flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-secondary" />
-            <span className="font-headline-sm text-xs font-bold text-on-surface">
-              Demo Simulation Presets:
-            </span>
+            <button
+              onClick={handleNavigateNextEvent}
+              className="py-2.5 px-4 rounded-xl bg-primary text-on-primary font-bold text-xs flex items-center gap-2 shadow-xs hover:bg-primary/95 active:scale-95 transition-all cursor-pointer"
+            >
+              <Compass className="w-4 h-4" />
+              <span>Navigate Venue in 3D Map</span>
+            </button>
+
+            <button
+              onClick={() => setActiveScreen('events')}
+              className="py-2.5 px-4 rounded-xl bg-surface-container text-on-surface font-semibold text-xs hover:bg-surface-container-high transition-colors cursor-pointer"
+            >
+              View All Events
+            </button>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={() => runDemoScenario('workshop')}
-              className="px-2.5 py-1 rounded-lg bg-surface-container-lowest text-xs font-semibold text-primary hover:bg-surface-container border border-surface-container cursor-pointer"
-            >
-              AI Workshop A*
-            </button>
-            <button
-              onClick={() => runDemoScenario('emergency')}
-              className="px-2.5 py-1 rounded-lg bg-error-container text-xs font-semibold text-error hover:bg-error-container/80 border border-error/20 cursor-pointer"
-            >
-              Corridor 2B Fire
-            </button>
-            <button
-              onClick={() => runDemoScenario('reset')}
-              className="px-2.5 py-1 rounded-lg bg-surface-container-lowest text-xs font-semibold text-on-surface hover:bg-surface-container border border-surface-container cursor-pointer"
-            >
-              Reset Normal
-            </button>
+        </div>
+
+        {/* Campus Telemetry Quick Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
+            <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
+              Active Campus Scholars
+            </span>
+            <span className="font-headline-sm text-2xl font-bold text-on-surface">
+              {telemetry.activeUsers.toLocaleString()}
+            </span>
+            <span className="text-xs text-tertiary font-bold mt-1 block">Live across Rajkot campus</span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
+            <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
+              Digital Library Vacancy
+            </span>
+            <span className="font-headline-sm text-2xl font-bold text-secondary">
+              {telemetry.openDesksInLibrary} Desks Free
+            </span>
+            <span className="text-xs text-secondary font-semibold mt-1 block">Quiet score: {telemetry.libraryNoiseDb} dB</span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
+            <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
+              CCTV AI Mesh
+            </span>
+            <span className="font-headline-sm text-2xl font-bold text-tertiary">
+              100% Active
+            </span>
+            <span className="text-xs text-tertiary font-bold mt-1 block">Optical hazard scanning on</span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-xs">
+            <span className="text-[11px] font-code-telemetry text-on-surface-variant uppercase block">
+              Spatial Ping Latency
+            </span>
+            <span className="font-headline-sm text-2xl font-bold text-on-surface">
+              {telemetry.meshLatencyMs} ms
+            </span>
+            <span className="text-xs text-tertiary font-bold mt-1 block">Beacon #09 synchronized</span>
           </div>
         </div>
       </div>
