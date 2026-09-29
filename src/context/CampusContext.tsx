@@ -129,11 +129,11 @@ export const CampusProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [activeAlgorithm, setActiveAlgorithm] = useState<RouteOptimizer>('A*');
   const [activePreference, setActivePreference] = useState<RoutePreference>('SAFEST');
 
-  const [isEmergencyActive, setIsEmergencyActive] = useState<boolean>(true);
-  const [activeIncident, setActiveIncident] = useState<EmergencyIncident | null>(INITIAL_EMERGENCY);
+  const [isEmergencyActive, setIsEmergencyActive] = useState<boolean>(false);
+  const [activeIncident, setActiveIncident] = useState<EmergencyIncident | null>(null);
 
   // Blocked paths
-  const [blockedEdgeIds, setBlockedEdgeIds] = useState<string[]>(INITIAL_EMERGENCY.affectedPathIds);
+  const [blockedEdgeIds, setBlockedEdgeIds] = useState<string[]>([]);
 
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
   const [navigationStepIndex, setNavigationStepIndex] = useState<number>(0);

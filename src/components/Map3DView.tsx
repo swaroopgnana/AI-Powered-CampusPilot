@@ -1,43 +1,34 @@
 /**
- * CampusPilot – Marwadi University 3D Digital Twin Map View
- * High-clarity interactive digital twin of Marwadi University (Rajkot campus).
- * Features 3D architectural models with lighting & shadows, glass facades,
- * tree foliage, digital twin telemetry sensors, CCTV optical feeds,
- * routing algorithm selector (A*, Dijkstra, BFS, DFS), and turn-by-turn guidance.
+ * CampusPilot – Marwadi University 3D Digital Twin Map
+ * Clean, architectural spatial canvas with zero visual noise.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useCampus } from '../context/CampusContext';
 import { CAMPUS_BUILDINGS, CAMPUS_NODES, CAMPUS_EDGES } from '../data/campusData';
 import { Building, RoutePreference, RouteOptimizer } from '../types';
 import {
-  Cpu,
-  AlertTriangle,
   Layers,
   Box,
   Plus,
   Minus,
   Crosshair,
-  Video,
   CornerUpRight,
   CornerUpLeft,
   ArrowUp,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Search,
   ShieldCheck,
   Zap,
   Accessibility,
-  Compass,
   Navigation,
   Info,
   X,
   DoorClosed,
-  Activity,
-  Maximize2,
-  Radio,
-  Sliders,
+  Moon,
+  Sun,
+  MapPin,
 } from 'lucide-react';
 
 export const Map3DView: React.FC = () => {
@@ -61,185 +52,235 @@ export const Map3DView: React.FC = () => {
 
   const [is3DMode, setIs3DMode] = useState<boolean>(true);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [showCctvLayer, setShowCctvLayer] = useState<boolean>(true);
-  const [showMeshSensors, setShowMeshSensors] = useState<boolean>(true);
-  const [activeBuildingModal, setActiveBuildingModal] = useState<Building | null>(null);
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [showNightGlow, setShowNightGlow] = useState<boolean>(false);
+  const [inspectorOpen, setInspectorOpen] = useState<boolean>(false);
   const [hoveredBuilding, setHoveredBuilding] = useState<string | null>(null);
 
-  const algorithms: RouteOptimizer[] = ['A*', 'Dijkstra', 'BFS', 'DFS'];
+  const algorithms: RouteOptimizer[] = ['A*', 'Dijkstra'];
   const preferences: {
     type: RoutePreference;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     time: string;
-    dist: string;
   }[] = [
-    { type: 'SAFEST', label: 'Safest Route', icon: ShieldCheck, time: '7 min', dist: '620 m' },
-    { type: 'FASTEST', label: 'Fastest Route', icon: Zap, time: '5 min', dist: '510 m' },
-    { type: 'ACCESSIBLE', label: 'Accessible', icon: Accessibility, time: '8 min', dist: '680 m' },
+    { type: 'FASTEST', label: 'Fastest', icon: Zap, time: '5 min' },
+    { type: 'SAFEST', label: 'Safest', icon: ShieldCheck, time: '7 min' },
+    { type: 'ACCESSIBLE', label: 'Step-Free', icon: Accessibility, time: '8 min' },
   ];
 
   const handleBuildingClick = (b: Building) => {
     setSelectedBuilding(b);
-    setActiveBuildingModal(b);
   };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setPanOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
 
   const activeStep = currentRoute?.steps[navigationStepIndex] || currentRoute?.steps[0];
 
   return (
-    <div className="relative w-full h-full flex flex-col overflow-hidden bg-slate-950 text-slate-100 select-none">
-      {/* Top Digital Twin Telemetry & Engine Header */}
-      <div className="z-20 px-3 sm:px-4 py-2 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 shadow-lg">
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* University Twin Badge */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 text-cyan-300 text-xs font-semibold border border-cyan-700/50 shadow-xs">
-            <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-            <span className="tracking-wide">MU Digital Twin • Rajkot Campus</span>
-          </div>
-
-          {/* Algorithm selector pills */}
-          <div className="flex items-center gap-1 bg-slate-800/90 p-0.5 rounded-lg border border-slate-700/60">
-            {algorithms.map((algo) => (
-              <button
-                key={algo}
-                onClick={() => setActiveAlgorithm(algo)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
-                  activeAlgorithm === algo
-                    ? 'bg-cyan-500 text-slate-950 shadow-xs font-bold'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                {algo}
-              </button>
-            ))}
-          </div>
+    <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#090d15] text-slate-100 select-none">
+      {/* Top Floating Controls Capsule */}
+      <div className="absolute top-3 inset-x-4 z-30 flex items-center justify-between pointer-events-none">
+        {/* Left: View & Theme Mode */}
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-[#0e1320]/80 backdrop-blur-md border border-white/[0.08] shadow-sm pointer-events-auto">
+          <button
+            onClick={() => setIs3DMode(true)}
+            className={`px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+              is3DMode
+                ? 'bg-white/10 text-white font-semibold'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            3D View
+          </button>
+          <button
+            onClick={() => setIs3DMode(false)}
+            className={`px-2.5 py-1 rounded text-xs font-medium transition-colors cursor-pointer ${
+              !is3DMode
+                ? 'bg-white/10 text-white font-semibold'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            2D Plan
+          </button>
+          <div className="w-[1px] h-3.5 bg-white/[0.08] mx-0.5" />
+          <button
+            onClick={() => setShowNightGlow(!showNightGlow)}
+            className="p-1 rounded text-slate-400 hover:text-white transition-colors cursor-pointer"
+            title="Toggle Night Mode"
+          >
+            {showNightGlow ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
         </div>
 
-        {/* Telemetry live status */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Spatial Mesh: 8ms latency</span>
-          </div>
-          <div className="flex items-center gap-1 text-[11px] font-mono text-cyan-300 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
-            <span>22.368° N, 70.800° E</span>
-          </div>
+        {/* Right: Minimal Solver Selection */}
+        <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-[#0e1320]/80 backdrop-blur-md border border-white/[0.08] shadow-sm pointer-events-auto text-xs text-slate-400">
+          <span className="px-2 text-[11px] text-slate-500 font-mono">Routing:</span>
+          {algorithms.map((algo) => (
+            <button
+              key={algo}
+              onClick={() => setActiveAlgorithm(algo)}
+              className={`px-2 py-0.5 rounded text-xs transition-colors cursor-pointer ${
+                activeAlgorithm === algo
+                  ? 'bg-sky-500/20 text-sky-300 font-semibold border border-sky-500/30'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {algo}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Emergency Active Warning Banner */}
-      {isEmergencyActive && (
-        <div className="z-20 px-3 sm:px-4 py-2 bg-red-600 text-white flex items-center justify-between text-xs sm:text-sm shadow-md animate-pulse">
-          <div className="flex items-center gap-2 truncate min-w-0">
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-            <span className="font-semibold truncate">
-              FOE Corridor 2B Hazard Active! Tactical safe evacuation path rerouted via Highway Gate 1.
-            </span>
+      {/* Turn-by-Turn Navigation Minimalist HUD */}
+      {isNavigating && activeStep && (
+        <div className="absolute top-14 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-40 max-w-sm w-full p-3 rounded-xl bg-[#0e1320]/90 backdrop-blur-md border border-white/[0.1] shadow-xl flex items-center justify-between gap-3 animate-in fade-in">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-sky-500/15 text-sky-400 flex items-center justify-center shrink-0">
+              {activeStep.direction === 'right' ? (
+                <CornerUpRight className="w-4 h-4" />
+              ) : activeStep.direction === 'left' ? (
+                <CornerUpLeft className="w-4 h-4" />
+              ) : activeStep.direction === 'arrive' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <ArrowUp className="w-4 h-4" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-semibold text-white truncate">{activeStep.instruction}</div>
+              <div className="text-[10px] text-slate-400">
+                Step {activeStep.stepIndex} of {currentRoute?.steps.length} · {activeStep.distanceMeters} m
+              </div>
+            </div>
           </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              disabled={navigationStepIndex === 0}
+              onClick={() => setNavigationStepIndex(Math.max(0, navigationStepIndex - 1))}
+              className="p-1 rounded bg-white/[0.05] disabled:opacity-30 hover:bg-white/[0.1] text-slate-300 cursor-pointer"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              disabled={!currentRoute || navigationStepIndex >= currentRoute.steps.length - 1}
+              onClick={() => setNavigationStepIndex(navigationStepIndex + 1)}
+              className="p-1 rounded bg-white/[0.05] disabled:opacity-30 hover:bg-white/[0.1] text-slate-300 cursor-pointer"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setIsNavigating(false)}
+              className="ml-1 px-2 py-1 rounded bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 text-xs cursor-pointer"
+            >
+              End
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Emergency Active Quiet Banner */}
+      {isEmergencyActive && (
+        <div className="absolute top-14 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-30 max-w-md w-full p-2.5 rounded-lg bg-red-950/80 border border-red-800/80 text-white backdrop-blur-md shadow-lg flex items-center justify-between text-xs">
+          <span className="font-medium text-red-200 truncate">
+            Safety protocol: Campus paths rerouted to Highway Gate 1
+          </span>
           <button
             onClick={() => setActiveScreen('emergency')}
-            className="px-2.5 py-1 rounded-full bg-white text-red-600 font-bold text-xs flex-shrink-0 cursor-pointer hover:bg-slate-100 shadow-sm"
+            className="ml-2 px-2 py-0.5 rounded bg-red-600 hover:bg-red-500 text-white font-semibold shrink-0 cursor-pointer text-xs"
           >
-            Evac HUD
+            View Evacuation
           </button>
         </div>
       )}
 
-      {/* 3D Digital Twin SVG Canvas Area */}
-      <div className="relative flex-1 w-full overflow-hidden bg-[#0d1424] flex items-center justify-center">
-        {/* Subtle coordinate grid lines overlay */}
-        <div
-          className="absolute inset-0 opacity-15 pointer-events-none"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, #38bdf8 1px, transparent 1px), linear-gradient(to right, #1e293b 1px, transparent 1px), linear-gradient(to bottom, #1e293b 1px, transparent 1px)',
-            backgroundSize: '40px 40px, 40px 40px, 40px 40px',
-          }}
-        />
-
+      {/* 3D Map Canvas */}
+      <div
+        className="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
         <svg
           viewBox="0 0 1000 700"
-          className="w-full h-full object-contain cursor-grab active:cursor-grabbing transition-transform duration-300"
+          className="w-full h-full max-w-[1300px] max-h-[850px] object-contain transition-transform duration-200"
           style={{
-            transform: `scale(${zoomLevel}) ${is3DMode ? 'rotateX(26deg) rotateZ(-6deg)' : ''}`,
+            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel}) ${
+              is3DMode ? 'rotateX(24deg) rotateZ(-4deg)' : ''
+            }`,
             transformOrigin: 'center center',
           }}
         >
           <defs>
-            {/* Soft Ambient Shadow Filter */}
-            <filter id="twinShadow" x="-30%" y="-30%" width="160%" height="160%">
-              <feDropShadow dx="8" dy="16" stdDeviation="12" floodColor="#000000" floodOpacity="0.45" />
+            <filter id="cleanShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="3" dy="8" stdDeviation="6" floodColor="#000000" floodOpacity="0.4" />
             </filter>
 
-            {/* Glowing Route Filter */}
-            <filter id="glowRoute" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="5" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-
-            {/* Campus Grounds & Block Linear Gradients */}
-            <radialGradient id="campusGroundGrad" cx="50%" cy="50%" r="65%">
-              <stop offset="0%" stopColor="#152238" />
-              <stop offset="60%" stopColor="#0f172a" />
-              <stop offset="100%" stopColor="#090d16" />
-            </radialGradient>
-
-            {/* FOE Engineering Block Roof */}
-            <linearGradient id="foeRoofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0284c7" />
-              <stop offset="100%" stopColor="#0369a1" />
+            {/* Subtle building roofs */}
+            <linearGradient id="roofAdmin" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1e293b" />
+              <stop offset="100%" stopColor="#0f172a" />
             </linearGradient>
 
-            {/* Main Admin Monolith Roof */}
-            <linearGradient id="mainAdminRoofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#2563eb" />
-              <stop offset="100%" stopColor="#1d4ed8" />
+            <linearGradient id="roofFoe" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1e2d42" />
+              <stop offset="100%" stopColor="#121b29" />
             </linearGradient>
 
-            {/* Central Library Roof */}
-            <linearGradient id="libraryRoofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0891b2" />
-              <stop offset="100%" stopColor="#0e7490" />
+            <linearGradient id="roofLib" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#132e35" />
+              <stop offset="100%" stopColor="#0c1d22" />
             </linearGradient>
 
-            {/* FMS Management & Law Roof */}
-            <linearGradient id="fmsRoofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#059669" />
-              <stop offset="100%" stopColor="#047857" />
-            </linearGradient>
-
-            {/* Food Court Roof */}
-            <linearGradient id="foodRoofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0ea5e9" />
-              <stop offset="100%" stopColor="#0284c7" />
-            </linearGradient>
-
-            {/* Sports Complex Roof */}
-            <linearGradient id="sportsRoofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#059669" />
-            </linearGradient>
-
-            {/* Hostel Towers Roof */}
-            <linearGradient id="hostelRoofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#6366f1" />
-              <stop offset="100%" stopColor="#4f46e5" />
+            <linearGradient id="roofFood" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1a2638" />
+              <stop offset="100%" stopColor="#101824" />
             </linearGradient>
           </defs>
 
-          {/* Marwadi University Campus Ground Base (Digital Twin Mat) */}
-          <rect x="25" y="25" width="950" height="650" rx="32" fill="url(#campusGroundGrad)" stroke="#1e293b" strokeWidth="3" />
+          {/* Clean Dark Campus Ground */}
+          <rect
+            x="40"
+            y="40"
+            width="920"
+            height="620"
+            rx="20"
+            fill={showNightGlow ? '#060910' : '#0b0f19'}
+            stroke="#1a2233"
+            strokeWidth="1.5"
+          />
 
-          {/* Surrounding Ring Road (Rajkot-Morbi Highway & Campus Ring) */}
-          <rect x="45" y="45" width="910" height="610" rx="26" fill="none" stroke="#334155" strokeWidth="8" strokeDasharray="16 12" opacity="0.6" />
+          {/* Central Courtyard & Green Quad */}
+          <rect
+            x="370"
+            y="325"
+            width="220"
+            height="140"
+            rx="12"
+            fill="#061a14"
+            stroke="#0a2e23"
+            strokeWidth="1"
+          />
+          <ellipse cx="480" cy="395" rx="35" ry="20" fill="#0c2e3d" opacity="0.5" />
 
-          {/* Lush Greenery Lawns & Courtyards */}
-          <rect x="360" y="320" width="220" height="150" rx="16" fill="#132e22" stroke="#10b981" strokeWidth="1" opacity="0.8" />
-          <ellipse cx="470" cy="390" rx="35" ry="24" fill="#0284c7" opacity="0.4" />
-          <circle cx="470" cy="390" r="14" fill="#38bdf8" opacity="0.6" className="animate-pulse" />
-
-          {/* Pedestrian Pathways Network */}
-          <g stroke="#334155" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" fill="none">
+          {/* Subtle Ground Pathways */}
+          <g stroke="#1a2436" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" fill="none">
             {CAMPUS_EDGES.map((e) => {
               const fromN = CAMPUS_NODES.find((n) => n.id === e.from);
               const toN = CAMPUS_NODES.find((n) => n.id === e.to);
@@ -248,8 +289,8 @@ export const Map3DView: React.FC = () => {
             })}
           </g>
 
-          {/* Inner Illuminated Pathway Lines */}
-          <g stroke="#64748b" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" fill="none">
+          {/* Walkways Inner Subtle Guide Line */}
+          <g stroke="#26344d" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none">
             {CAMPUS_EDGES.map((e) => {
               const fromN = CAMPUS_NODES.find((n) => n.id === e.from);
               const toN = CAMPUS_NODES.find((n) => n.id === e.to);
@@ -262,524 +303,392 @@ export const Map3DView: React.FC = () => {
                   y1={fromN.y}
                   x2={toN.x}
                   y2={toN.y}
-                  stroke={isBlocked ? '#f43f5e' : '#94a3b8'}
-                  strokeDasharray={isBlocked ? '6 6' : undefined}
+                  stroke={isBlocked ? '#ef4444' : '#26344d'}
+                  strokeDasharray={isBlocked ? '4 4' : undefined}
                 />
               );
             })}
           </g>
 
-          {/* Hazard Blinking Markers on Blocked Paths */}
-          {CAMPUS_EDGES.filter((e) => blockedEdgeIds.includes(e.id)).map((e) => {
-            const fromN = CAMPUS_NODES.find((n) => n.id === e.from);
-            const toN = CAMPUS_NODES.find((n) => n.id === e.to);
-            if (!fromN || !toN) return null;
-            const midX = (fromN.x + toN.x) / 2;
-            const midY = (fromN.y + toN.y) / 2;
-            return (
-              <g key={'hazard-' + e.id} className="animate-pulse">
-                <circle cx={midX} cy={midY} r="18" fill="#e11d48" opacity="0.9" />
-                <circle cx={midX} cy={midY} r="26" fill="#e11d48" opacity="0.3" className="animate-ping" />
-                <line x1={midX - 7} y1={midY - 7} x2={midX + 7} y2={midY + 7} stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
-                <line x1={midX + 7} y1={midY - 7} x2={midX - 7} y2={midY + 7} stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
-              </g>
-            );
-          })}
-
-          {/* Active Navigation Path (Neon Cyan / Emergency Emerald Ribbon) */}
+          {/* Active Route Ribbon - Clean, Non-noisy */}
           {currentRoute && currentRoute.nodes.length > 1 && (
             <g>
               <polyline
                 points={currentRoute.nodes.map((n) => `${n.x},${n.y}`).join(' ')}
                 fill="none"
-                stroke={isEmergencyActive ? '#10b981' : '#38bdf8'}
-                strokeWidth="16"
+                stroke={isEmergencyActive ? '#10b981' : '#0284c7'}
+                strokeWidth="10"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.5"
-                filter="url(#glowRoute)"
+                opacity="0.25"
               />
               <polyline
                 points={currentRoute.nodes.map((n) => `${n.x},${n.y}`).join(' ')}
                 fill="none"
-                stroke={isEmergencyActive ? '#34d399' : '#0284c7'}
-                strokeWidth="6"
+                stroke={isEmergencyActive ? '#34d399' : '#38bdf8'}
+                strokeWidth="3.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeDasharray="12 8"
-                className="animate-dash"
               />
             </g>
           )}
 
-          {/* Campus Decorative Landscaping Foliage / Trees */}
-          <g fill="#15803d" opacity="0.85">
-            <circle cx="430" cy="380" r="14" />
-            <circle cx="510" cy="380" r="15" />
-            <circle cx="580" cy="330" r="13" />
-            <circle cx="620" cy="270" r="16" />
-            <circle cx="360" cy="280" r="16" />
-            <circle cx="510" cy="220" r="15" />
-            <circle cx="730" cy="390" r="14" />
-            <circle cx="270" cy="450" r="14" />
+          {/* Foliage (Subtle Minimal Trees) */}
+          <g fill="#0b291d" opacity="0.6">
+            <circle cx="430" cy="380" r="10" />
+            <circle cx="510" cy="380" r="11" />
+            <circle cx="580" cy="330" r="9" />
+            <circle cx="620" cy="270" r="11" />
+            <circle cx="360" cy="280" r="11" />
+            <circle cx="730" cy="390" r="10" />
           </g>
 
           {/* ======================================================== */}
-          {/* 3D DIGITAL TWIN BUILDINGS (Isometrically Modeled)         */}
+          {/* ARCHITECTURAL BUILDINGS (Subtle, Clean Prisms)           */}
           {/* ======================================================== */}
 
-          {/* 1. Main Admin Building & Grand Central Atrium (Center-Top) */}
+          {/* 1. Main Admin Building */}
           <g
-            className="cursor-pointer transition-transform duration-200 hover:scale-105 origin-center"
+            className="cursor-pointer transition-opacity hover:opacity-90"
             onClick={() => handleBuildingClick(CAMPUS_BUILDINGS[0])}
             onMouseEnter={() => setHoveredBuilding(CAMPUS_BUILDINGS[0].id)}
             onMouseLeave={() => setHoveredBuilding(null)}
-            filter="url(#twinShadow)"
+            filter="url(#cleanShadow)"
           >
-            {/* Ground Shadow */}
-            <ellipse cx="480" cy="210" rx="95" ry="42" fill="#000000" opacity="0.5" />
-            {/* Front Extrusion Facet */}
-            <path d="M 390 150 L 550 150 L 570 210 L 410 210 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-            {/* Side Facet */}
-            <path d="M 390 150 L 410 210 L 410 170 L 390 110 Z" fill="#0f172a" />
-            {/* Top Roof with Blueprint Grid */}
-            <polygon points="390,110 550,110 570,170 410,170" fill="url(#mainAdminRoofGrad)" stroke="#38bdf8" strokeWidth="2" />
-            {/* Iconic Admin Dome */}
-            <ellipse cx="480" cy="135" rx="30" ry="16" fill="#38bdf8" opacity="0.75" />
-            {/* Architectural Glass Ribbon Windows */}
-            <line x1="420" y1="180" x2="550" y2="180" stroke="#bae6fd" strokeWidth="3" strokeDasharray="10 4" />
-            <line x1="425" y1="195" x2="555" y2="195" stroke="#bae6fd" strokeWidth="3" strokeDasharray="10 4" />
-            {/* Tag Badge */}
-            <rect x="400" y="80" width="160" height="24" rx="6" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
-            <text x="480" y="96" fill="#ffffff" fontSize="10.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              Main Admin Building (MU)
-            </text>
+            <path d="M 390 150 L 550 150 L 570 210 L 410 210 Z" fill="#0d1422" stroke="#1e293b" strokeWidth="1" />
+            <polygon
+              points="390,110 550,110 570,170 410,170"
+              fill="url(#roofAdmin)"
+              stroke={selectedBuilding?.id === CAMPUS_BUILDINGS[0].id ? '#38bdf8' : '#334155'}
+              strokeWidth={selectedBuilding?.id === CAMPUS_BUILDINGS[0].id ? 2 : 1}
+            />
+            <ellipse cx="480" cy="135" rx="22" ry="12" fill="#1e293b" stroke="#334155" strokeWidth="1" />
+            <g transform="translate(480, 88)">
+              <rect x="-65" y="-12" width="130" height="18" rx="4" fill="#0a0d14" fillOpacity="0.85" stroke="#1e293b" strokeWidth="1" />
+              <text x="0" y="1" fill="#cbd5e1" fontSize="9.5" fontWeight="600" textAnchor="middle" dominantBaseline="middle" fontFamily="sans-serif">
+                Main Admin (MU-MB)
+              </text>
+            </g>
           </g>
 
-          {/* 2. Faculty of Engineering & Technology (FOE Block) (West) */}
+          {/* 2. FOE Engineering Block */}
           <g
-            className="cursor-pointer transition-transform duration-200 hover:scale-105 origin-center"
+            className="cursor-pointer transition-opacity hover:opacity-90"
             onClick={() => handleBuildingClick(CAMPUS_BUILDINGS[1])}
             onMouseEnter={() => setHoveredBuilding(CAMPUS_BUILDINGS[1].id)}
             onMouseLeave={() => setHoveredBuilding(null)}
-            filter="url(#twinShadow)"
+            filter="url(#cleanShadow)"
           >
-            <ellipse cx="230" cy="335" rx="90" ry="40" fill="#000000" opacity="0.45" />
-            <path d="M 140 260 L 300 260 L 320 325 L 160 325 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-            <polygon points="140,220 300,220 320,285 160,285" fill="url(#foeRoofGrad)" stroke="#38bdf8" strokeWidth="2" />
-            {/* Tech Wing Solar Panels */}
-            <rect x="175" y="235" width="40" height="20" rx="3" fill="#0c4a6e" stroke="#38bdf8" strokeWidth="1" />
-            <rect x="235" y="235" width="40" height="20" rx="3" fill="#0c4a6e" stroke="#38bdf8" strokeWidth="1" />
-            <line x1="170" y1="300" x2="305" y2="300" stroke="#bae6fd" strokeWidth="3" strokeDasharray="8 4" />
-            <line x1="175" y1="315" x2="310" y2="315" stroke="#bae6fd" strokeWidth="3" strokeDasharray="8 4" />
-            <rect x="150" y="190" width="160" height="24" rx="6" fill="#0369a1" stroke="#38bdf8" strokeWidth="1" />
-            <text x="230" y="206" fill="#ffffff" fontSize="10.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              FOE Engineering Block
-            </text>
+            <path d="M 140 260 L 300 260 L 320 325 L 160 325 Z" fill="#0d1422" stroke="#1e293b" strokeWidth="1" />
+            <polygon
+              points="140,220 300,220 320,285 160,285"
+              fill="url(#roofFoe)"
+              stroke={selectedBuilding?.id === CAMPUS_BUILDINGS[1].id ? '#38bdf8' : '#334155'}
+              strokeWidth={selectedBuilding?.id === CAMPUS_BUILDINGS[1].id ? 2 : 1}
+            />
+            <g transform="translate(230, 198)">
+              <rect x="-65" y="-12" width="130" height="18" rx="4" fill="#0a0d14" fillOpacity="0.85" stroke="#1e293b" strokeWidth="1" />
+              <text x="0" y="1" fill="#cbd5e1" fontSize="9.5" fontWeight="600" textAnchor="middle" dominantBaseline="middle" fontFamily="sans-serif">
+                FOE Engineering (MU-FOE)
+              </text>
+            </g>
           </g>
 
-          {/* 3. Central Knowledge Resource Center & Digital Library (East) */}
+          {/* 3. Central Digital Library */}
           <g
-            className="cursor-pointer transition-transform duration-200 hover:scale-105 origin-center"
+            className="cursor-pointer transition-opacity hover:opacity-90"
             onClick={() => handleBuildingClick(CAMPUS_BUILDINGS[2])}
             onMouseEnter={() => setHoveredBuilding(CAMPUS_BUILDINGS[2].id)}
             onMouseLeave={() => setHoveredBuilding(null)}
-            filter="url(#twinShadow)"
+            filter="url(#cleanShadow)"
           >
-            <ellipse cx="710" cy="340" rx="90" ry="42" fill="#000000" opacity="0.45" />
-            <path d="M 620 270 L 780 270 L 800 335 L 640 335 Z" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-            <polygon points="620,230 780,230 800,295 640,295" fill="url(#libraryRoofGrad)" stroke="#38bdf8" strokeWidth="2" />
-            <ellipse cx="710" cy="260" rx="32" ry="14" fill="#0891b2" opacity="0.8" />
-            <line x1="650" y1="310" x2="785" y2="310" stroke="#e0f2fe" strokeWidth="3" strokeDasharray="8 4" />
-            <line x1="655" y1="325" x2="790" y2="325" stroke="#e0f2fe" strokeWidth="3" strokeDasharray="8 4" />
-            <rect x="630" y="200" width="160" height="24" rx="6" fill="#0891b2" stroke="#38bdf8" strokeWidth="1" />
-            <text x="710" y="216" fill="#ffffff" fontSize="10.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              MU Central Digital Library
-            </text>
+            <path d="M 620 270 L 780 270 L 800 335 L 640 335 Z" fill="#0d1422" stroke="#1e293b" strokeWidth="1" />
+            <polygon
+              points="620,230 780,230 800,295 640,295"
+              fill="url(#roofLib)"
+              stroke={selectedBuilding?.id === CAMPUS_BUILDINGS[2].id ? '#38bdf8' : '#334155'}
+              strokeWidth={selectedBuilding?.id === CAMPUS_BUILDINGS[2].id ? 2 : 1}
+            />
+            <g transform="translate(710, 208)">
+              <rect x="-65" y="-12" width="130" height="18" rx="4" fill="#0a0d14" fillOpacity="0.85" stroke="#1e293b" strokeWidth="1" />
+              <text x="0" y="1" fill="#cbd5e1" fontSize="9.5" fontWeight="600" textAnchor="middle" dominantBaseline="middle" fontFamily="sans-serif">
+                Central Library (MU-CL)
+              </text>
+            </g>
           </g>
 
-          {/* 4. Faculty of Management Studies & Law (FMS Block) (Northeast) */}
+          {/* 4. Faculty of Management Studies & Law */}
           <g
-            className="cursor-pointer transition-transform duration-200 hover:scale-105 origin-center"
+            className="cursor-pointer transition-opacity hover:opacity-90"
             onClick={() => handleBuildingClick(CAMPUS_BUILDINGS[3])}
             onMouseEnter={() => setHoveredBuilding(CAMPUS_BUILDINGS[3].id)}
             onMouseLeave={() => setHoveredBuilding(null)}
-            filter="url(#twinShadow)"
+            filter="url(#cleanShadow)"
           >
-            <ellipse cx="740" cy="185" rx="75" ry="36" fill="#000000" opacity="0.4" />
-            <polygon points="665,125 795,125 815,175 685,175" fill="url(#fmsRoofGrad)" stroke="#34d399" strokeWidth="1.5" />
-            <rect x="670" y="95" width="145" height="24" rx="6" fill="#047857" stroke="#34d399" strokeWidth="1" />
-            <text x="742" y="111" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              FMS & Law Block
-            </text>
+            <polygon
+              points="665,125 795,125 815,175 685,175"
+              fill="#102322"
+              stroke={selectedBuilding?.id === CAMPUS_BUILDINGS[3].id ? '#38bdf8' : '#27433f'}
+              strokeWidth={selectedBuilding?.id === CAMPUS_BUILDINGS[3].id ? 2 : 1}
+            />
+            <g transform="translate(740, 106)">
+              <rect x="-55" y="-11" width="110" height="17" rx="4" fill="#0a0d14" fillOpacity="0.85" stroke="#1e293b" strokeWidth="1" />
+              <text x="0" y="1" fill="#cbd5e1" fontSize="9" fontWeight="600" textAnchor="middle" dominantBaseline="middle" fontFamily="sans-serif">
+                FMS & Law (MU-FMS)
+              </text>
+            </g>
           </g>
 
-          {/* 5. Student Food Court & Cafeteria (Southwest) */}
+          {/* 5. Food Court & Amul */}
           <g
-            className="cursor-pointer transition-transform duration-200 hover:scale-105 origin-center"
+            className="cursor-pointer transition-opacity hover:opacity-90"
             onClick={() => handleBuildingClick(CAMPUS_BUILDINGS[4])}
             onMouseEnter={() => setHoveredBuilding(CAMPUS_BUILDINGS[4].id)}
             onMouseLeave={() => setHoveredBuilding(null)}
-            filter="url(#twinShadow)"
+            filter="url(#cleanShadow)"
           >
-            <ellipse cx="290" cy="535" rx="75" ry="35" fill="#000000" opacity="0.4" />
-            <polygon points="215,475 345,475 365,525 235,525" fill="url(#foodRoofGrad)" stroke="#38bdf8" strokeWidth="1.5" />
-            <rect x="220" y="445" width="140" height="24" rx="6" fill="#0284c7" stroke="#38bdf8" strokeWidth="1" />
-            <text x="290" y="461" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              MU Food Court & Amul
-            </text>
+            <polygon
+              points="215,475 345,475 365,525 235,525"
+              fill="url(#roofFood)"
+              stroke={selectedBuilding?.id === CAMPUS_BUILDINGS[4].id ? '#38bdf8' : '#334155'}
+              strokeWidth={selectedBuilding?.id === CAMPUS_BUILDINGS[4].id ? 2 : 1}
+            />
+            <g transform="translate(290, 456)">
+              <rect x="-60" y="-11" width="120" height="17" rx="4" fill="#0a0d14" fillOpacity="0.85" stroke="#1e293b" strokeWidth="1" />
+              <text x="0" y="1" fill="#cbd5e1" fontSize="9" fontWeight="600" textAnchor="middle" dominantBaseline="middle" fontFamily="sans-serif">
+                Food Court & Amul (MU-FC)
+              </text>
+            </g>
           </g>
 
-          {/* 6. Marwadi Sports Complex & Indoor Arena (Southeast) */}
+          {/* 6. Sports Pavilion */}
           <g
-            className="cursor-pointer transition-transform duration-200 hover:scale-105 origin-center"
+            className="cursor-pointer transition-opacity hover:opacity-90"
             onClick={() => handleBuildingClick(CAMPUS_BUILDINGS[5])}
             onMouseEnter={() => setHoveredBuilding(CAMPUS_BUILDINGS[5].id)}
             onMouseLeave={() => setHoveredBuilding(null)}
-            filter="url(#twinShadow)"
+            filter="url(#cleanShadow)"
           >
-            <ellipse cx="790" cy="545" rx="85" ry="40" fill="#000000" opacity="0.4" />
-            <polygon points="710,485 850,485 870,540 730,540" fill="url(#sportsRoofGrad)" stroke="#34d399" strokeWidth="1.5" />
-            {/* Running Track Strip */}
-            <ellipse cx="790" cy="520" rx="55" ry="20" fill="none" stroke="#ef4444" strokeWidth="3" opacity="0.7" />
-            <rect x="720" y="455" width="145" height="24" rx="6" fill="#047857" stroke="#34d399" strokeWidth="1" />
-            <text x="792" y="471" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              MU Sports Pavilion
-            </text>
+            <polygon
+              points="710,485 850,485 870,540 730,540"
+              fill="#13231f"
+              stroke={selectedBuilding?.id === CAMPUS_BUILDINGS[5].id ? '#38bdf8' : '#27443d'}
+              strokeWidth={selectedBuilding?.id === CAMPUS_BUILDINGS[5].id ? 2 : 1}
+            />
+            <g transform="translate(790, 466)">
+              <rect x="-60" y="-11" width="120" height="17" rx="4" fill="#0a0d14" fillOpacity="0.85" stroke="#1e293b" strokeWidth="1" />
+              <text x="0" y="1" fill="#cbd5e1" fontSize="9" fontWeight="600" textAnchor="middle" dominantBaseline="middle" fontFamily="sans-serif">
+                Sports Complex (MU-SP)
+              </text>
+            </g>
           </g>
 
-          {/* 7. Hostel Towers & Medical Health Center (South) */}
+          {/* 7. Hostel Towers */}
           <g
-            className="cursor-pointer transition-transform duration-200 hover:scale-105 origin-center"
+            className="cursor-pointer transition-opacity hover:opacity-90"
             onClick={() => handleBuildingClick(CAMPUS_BUILDINGS[6])}
             onMouseEnter={() => setHoveredBuilding(CAMPUS_BUILDINGS[6].id)}
             onMouseLeave={() => setHoveredBuilding(null)}
-            filter="url(#twinShadow)"
+            filter="url(#cleanShadow)"
           >
-            <ellipse cx="520" cy="625" rx="75" ry="34" fill="#000000" opacity="0.4" />
-            <polygon points="450,570 575,570 595,620 470,620" fill="url(#hostelRoofGrad)" stroke="#818cf8" strokeWidth="1.5" />
-            <rect x="450" y="540" width="140" height="24" rx="6" fill="#4f46e5" stroke="#818cf8" strokeWidth="1" />
-            <text x="520" y="556" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              Hostel & Health Clinic
-            </text>
+            <polygon
+              points="450,570 575,570 595,620 470,620"
+              fill="#191c2e"
+              stroke={selectedBuilding?.id === CAMPUS_BUILDINGS[6].id ? '#38bdf8' : '#333857'}
+              strokeWidth={selectedBuilding?.id === CAMPUS_BUILDINGS[6].id ? 2 : 1}
+            />
+            <g transform="translate(520, 551)">
+              <rect x="-55" y="-11" width="110" height="17" rx="4" fill="#0a0d14" fillOpacity="0.85" stroke="#1e293b" strokeWidth="1" />
+              <text x="0" y="1" fill="#cbd5e1" fontSize="9" fontWeight="600" textAnchor="middle" dominantBaseline="middle" fontFamily="sans-serif">
+                Hostels & Clinic (MU-HST)
+              </text>
+            </g>
           </g>
 
-          {/* 8. Main Highway Gate 1 & Safe Assembly Lawn 1 (North) */}
+          {/* 8. Highway Gate 1 (Safe Assembly Point) */}
           <g
-            className="cursor-pointer transition-transform duration-200 hover:scale-105 origin-center"
+            className="cursor-pointer transition-opacity hover:opacity-90"
             onClick={() => handleBuildingClick(CAMPUS_BUILDINGS[7])}
             onMouseEnter={() => setHoveredBuilding(CAMPUS_BUILDINGS[7].id)}
             onMouseLeave={() => setHoveredBuilding(null)}
           >
-            <circle cx="470" cy="65" r="34" fill="#10b981" opacity="0.25" className="animate-ping" />
-            <circle cx="470" cy="65" r="22" fill="#059669" stroke="#ffffff" strokeWidth="2.5" />
-            <text x="470" y="70" fill="#ffffff" fontSize="14" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+            <circle cx="470" cy="65" r="14" fill="#059669" stroke="#ffffff" strokeWidth="1.5" />
+            <text x="470" y="69" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
               ✓
             </text>
-            <rect x="375" y="16" width="190" height="24" rx="6" fill="#047857" stroke="#34d399" strokeWidth="1.5" />
-            <text x="470" y="32" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              Highway Gate 1 Safe Assembly
-            </text>
+            <g transform="translate(470, 36)">
+              <rect x="-60" y="-11" width="120" height="17" rx="4" fill="#0a0d14" fillOpacity="0.85" stroke="#059669" strokeWidth="1" />
+              <text x="0" y="1" fill="#6ee7b7" fontSize="8.5" fontWeight="600" textAnchor="middle" dominantBaseline="middle" fontFamily="sans-serif">
+                Highway Gate 1 (Muster)
+              </text>
+            </g>
           </g>
 
-          {/* CCTV Optical Sensors Mesh */}
-          {showCctvLayer && (
-            <g>
-              {[
-                { x: 470, y: 390, id: 'cctv-1' },
-                { x: 490, y: 320, id: 'cctv-2' },
-                { x: 640, y: 340, id: 'cctv-3' },
-                { x: 380, y: 240, id: 'cctv-4' },
-                { x: 710, y: 480, id: 'cctv-5' },
-                { x: 340, y: 470, id: 'cctv-6' },
-                { x: 500, y: 550, id: 'cctv-7' },
-              ].map((c) => (
-                <g key={c.id}>
-                  <circle cx={c.x} cy={c.y} r="9" fill="#38bdf8" opacity="0.25" className="animate-pulse" />
-                  <circle cx={c.x} cy={c.y} r="4" fill="#0284c7" stroke="#ffffff" strokeWidth="1" />
-                </g>
-              ))}
-            </g>
-          )}
-
-          {/* User Live Location Beacon (Zone B - Central Quad) */}
+          {/* User Location Marker */}
           <g>
-            <circle cx={userLocation.x} cy={userLocation.y} r="26" fill="#38bdf8" opacity="0.3" className="animate-ping" />
-            <circle cx={userLocation.x} cy={userLocation.y} r="14" fill="#0284c7" stroke="#ffffff" strokeWidth="3" />
-            <circle cx={userLocation.x} cy={userLocation.y} r="5" fill="#38bdf8" />
-            <rect x={userLocation.x - 55} y={userLocation.y - 44} width="110" height="22" rx="5" fill="#0369a1" stroke="#38bdf8" strokeWidth="1" />
-            <text
-              x={userLocation.x}
-              y={userLocation.y - 29}
-              fill="#ffffff"
-              fontSize="9.5"
-              fontWeight="bold"
-              textAnchor="middle"
-              fontFamily="sans-serif"
-            >
-              You (Zone B Quad)
-            </text>
+            <circle cx={userLocation.x} cy={userLocation.y} r="16" fill="#38bdf8" opacity="0.2" />
+            <circle cx={userLocation.x} cy={userLocation.y} r="6" fill="#0284c7" stroke="#ffffff" strokeWidth="2" />
           </g>
         </svg>
-
-        {/* Floating HUD Map Canvas Controls (Right Side) */}
-        <div className="absolute right-4 top-4 flex flex-col gap-2 z-20">
-          <button
-            onClick={() => setIs3DMode((v) => !v)}
-            title="Toggle 2.5D Isometric Tilt"
-            className="w-10 h-10 rounded-xl bg-slate-900/90 backdrop-blur-md shadow-md border border-slate-700 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 active:scale-95 transition-all cursor-pointer"
-          >
-            {is3DMode ? <Box className="w-5 h-5 text-cyan-400" /> : <Layers className="w-5 h-5 text-slate-300" />}
-          </button>
-
-          <button
-            onClick={() => setZoomLevel((z) => Math.min(1.6, z + 0.2))}
-            title="Zoom In"
-            className="w-10 h-10 rounded-xl bg-slate-900/90 backdrop-blur-md shadow-md border border-slate-700 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 active:scale-95 transition-all cursor-pointer"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={() => setZoomLevel((z) => Math.max(0.8, z - 0.2))}
-            title="Zoom Out"
-            className="w-10 h-10 rounded-xl bg-slate-900/90 backdrop-blur-md shadow-md border border-slate-700 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 active:scale-95 transition-all cursor-pointer"
-          >
-            <Minus className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={() => {
-              setZoomLevel(1);
-              setIs3DMode(true);
-            }}
-            title="Recenter Campus View"
-            className="w-10 h-10 rounded-xl bg-slate-900/90 backdrop-blur-md shadow-md border border-slate-700 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 active:scale-95 transition-all cursor-pointer"
-          >
-            <Crosshair className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={() => setShowCctvLayer((v) => !v)}
-            title="Toggle CCTV Coverage"
-            className={`w-10 h-10 rounded-xl backdrop-blur-md shadow-md border border-slate-700 flex items-center justify-center active:scale-95 transition-all cursor-pointer ${
-              showCctvLayer ? 'bg-cyan-600 text-white' : 'bg-slate-900/90 text-slate-400 hover:text-white'
-            }`}
-          >
-            <Video className="w-5 h-5" />
-          </button>
-        </div>
       </div>
 
-      {/* Turn-by-Turn Navigation HUD Overlay */}
-      {isNavigating && activeStep && (
-        <div className="z-30 px-3 sm:px-4 py-3 bg-slate-900 text-white flex flex-col gap-2 shadow-2xl border-t border-slate-800">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center flex-shrink-0 border border-cyan-500/40">
-                {activeStep.direction === 'right' ? (
-                  <CornerUpRight className="w-5 h-5" />
-                ) : activeStep.direction === 'left' ? (
-                  <CornerUpLeft className="w-5 h-5" />
-                ) : activeStep.direction === 'arrive' ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                ) : (
-                  <ArrowUp className="w-5 h-5" />
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="font-bold text-sm sm:text-base truncate text-cyan-200">{activeStep.instruction}</p>
-                <p className="text-xs text-slate-400">
-                  Step {activeStep.stepIndex} of {currentRoute?.steps.length} • {activeStep.distanceMeters}m
-                </p>
-              </div>
-            </div>
+      {/* Floating Canvas Controls (Right) */}
+      <div className="absolute right-4 top-14 z-30 flex flex-col gap-1.5">
+        <button
+          onClick={() => setZoomLevel((z) => Math.min(1.8, z + 0.15))}
+          className="w-8 h-8 rounded-lg bg-[#0e1320]/80 backdrop-blur-md border border-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer"
+          title="Zoom In"
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </button>
 
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                disabled={navigationStepIndex === 0}
-                onClick={() => setNavigationStepIndex(Math.max(0, navigationStepIndex - 1))}
-                className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center disabled:opacity-30 cursor-pointer text-slate-300 hover:text-white"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                disabled={!currentRoute || navigationStepIndex >= currentRoute.steps.length - 1}
-                onClick={() => setNavigationStepIndex(navigationStepIndex + 1)}
-                className="w-8 h-8 rounded-full bg-cyan-500 text-slate-950 flex items-center justify-center disabled:opacity-30 cursor-pointer font-bold"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setIsNavigating(false)}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 cursor-pointer border border-slate-700"
-              >
-                Exit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        <button
+          onClick={() => setZoomLevel((z) => Math.max(0.75, z - 0.15))}
+          className="w-8 h-8 rounded-lg bg-[#0e1320]/80 backdrop-blur-md border border-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer"
+          title="Zoom Out"
+        >
+          <Minus className="w-3.5 h-3.5" />
+        </button>
 
-      {/* Bottom Sheet Routing Controller for Marwadi University */}
+        <button
+          onClick={() => {
+            setZoomLevel(1);
+            setPanOffset({ x: 0, y: 0 });
+            setIs3DMode(true);
+          }}
+          className="w-8 h-8 rounded-lg bg-[#0e1320]/80 backdrop-blur-md border border-white/[0.08] flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/[0.08] transition-colors cursor-pointer"
+          title="Reset Camera"
+        >
+          <Crosshair className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Bottom Floating Route & Landmark Card (Linear / Apple Maps style) */}
       {!isNavigating && (
-        <div className="z-20 p-3 sm:p-4 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 shadow-2xl rounded-t-3xl max-w-4xl mx-auto w-full">
-          {/* Destination Header */}
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-cyan-400 font-bold uppercase">
-                  {selectedBuilding?.code || 'Destination'}
+        <div className="absolute bottom-4 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-30 max-w-xl w-full p-4 rounded-xl bg-[#0e1320]/90 backdrop-blur-xl border border-white/[0.08] shadow-2xl space-y-3.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <span className="font-mono text-sky-400 font-semibold">
+                  {selectedBuilding?.code || 'MU-CL'}
                 </span>
-                <span className="w-1 h-1 rounded-full bg-slate-600"></span>
-                <span className="text-xs text-slate-400">
-                  {isEmergencyActive ? 'Muster Point Assembly' : '3D Spatial Path'}
-                </span>
+                <span>·</span>
+                <span>{selectedBuilding?.category || 'Library'}</span>
+                <span>·</span>
+                <span>{selectedBuilding?.floors || 4} Floors</span>
               </div>
-              <h2 className="text-base sm:text-lg font-bold text-white truncate">
+              <h2 className="text-base font-semibold text-white truncate mt-0.5">
                 {selectedBuilding?.name || 'MU Central Knowledge Resource Center'}
               </h2>
             </div>
 
             <button
-              onClick={() => setActiveScreen('facilities')}
-              className="px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-slate-700"
+              onClick={() => setInspectorOpen(true)}
+              className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              title="Building Details"
             >
-              <Search className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Change</span>
+              <Info className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Route Preferences Grid */}
-          <div className="grid grid-cols-3 gap-2 mb-3">
+          {/* Clean Segmented Route Mode */}
+          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-black/30 border border-white/[0.04]">
             {preferences.map((p) => {
               const isSelected = activePreference === p.type;
-              const Icon = p.icon;
               return (
                 <button
                   key={p.type}
                   onClick={() => setActivePreference(p.type)}
-                  className={`p-2.5 rounded-xl border flex flex-col items-start gap-1 transition-all cursor-pointer ${
+                  className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                     isSelected
-                      ? 'border-cyan-500 bg-cyan-950/40 text-cyan-300 shadow-sm font-semibold'
-                      : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                      ? 'bg-white/10 text-white font-semibold'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <Icon className="w-4 h-4" />
-                    <span className="font-mono text-xs font-bold">{p.time}</span>
-                  </div>
-                  <span className="text-xs font-bold truncate text-white">{p.label}</span>
-                  <span className="text-[11px] text-slate-400 truncate">{p.dist}</span>
+                  <p.icon className="w-3.5 h-3.5" />
+                  <span>{p.label}</span>
+                  <span className="text-[11px] text-slate-500 font-mono">({p.time})</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Micro Wayfinding Telemetry Bar */}
-          {currentRoute && (
-            <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs mb-3">
-              <div className="flex items-center gap-1.5 text-slate-300 truncate min-w-0">
-                <Compass className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                <span className="font-mono text-xs truncate">
-                  Via {currentRoute.waypointsHud.via} • {currentRoute.turnsCount} turns • {currentRoute.elevationMeters}m elev
-                </span>
-              </div>
-              <div className="flex items-center gap-1 text-emerald-400 font-mono text-xs font-bold flex-shrink-0 ml-2">
-                <Video className="w-3.5 h-3.5" />
-                <span>{currentRoute.cctvPostsCount} CCTV</span>
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
+          {/* Action Row */}
+          <div className="flex items-center gap-2 pt-0.5">
             <button
               onClick={() => {
                 setIsNavigating(true);
                 setNavigationStepIndex(0);
               }}
-              className="flex-1 py-3 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-all cursor-pointer"
+              className="flex-1 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Navigation className="w-4 h-4" />
-              <span>Start Turn-by-Turn Navigation</span>
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Start Navigation</span>
             </button>
-
             <button
-              onClick={() => {
-                if (selectedBuilding) setActiveBuildingModal(selectedBuilding);
-              }}
-              className="p-3 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors cursor-pointer border border-slate-700"
-              title="Building Details"
+              onClick={() => setActiveScreen('facilities')}
+              className="px-3.5 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 text-xs font-medium transition-colors cursor-pointer"
             >
-              <Info className="w-5 h-5 text-cyan-400" />
+              Directory
             </button>
           </div>
         </div>
       )}
 
-      {/* Building Details Modal */}
-      {activeBuildingModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="bg-slate-900 text-slate-100 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-700 animate-in fade-in zoom-in-95">
-            <div className="flex items-start justify-between mb-3">
+      {/* Building Slide-Out Inspector Modal */}
+      {inspectorOpen && selectedBuilding && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#0e1320] border border-white/[0.1] rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+            <div className="flex items-start justify-between">
               <div>
-                <span className="font-mono text-xs text-cyan-400 font-bold">
-                  {activeBuildingModal.code} • {activeBuildingModal.category}
-                </span>
-                <h3 className="text-lg font-bold text-white">
-                  {activeBuildingModal.name}
+                <div className="text-xs font-mono text-sky-400">
+                  {selectedBuilding.code} · {selectedBuilding.category}
+                </div>
+                <h3 className="text-base font-semibold text-white mt-0.5">
+                  {selectedBuilding.name}
                 </h3>
               </div>
               <button
-                onClick={() => setActiveBuildingModal(null)}
-                className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer border border-slate-700"
+                onClick={() => setInspectorOpen(false)}
+                className="p-1 rounded-md text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-              {activeBuildingModal.description}
+            <p className="text-xs text-slate-300 leading-relaxed">
+              {selectedBuilding.description}
             </p>
 
-            <div className="space-y-3 mb-5">
-              <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
-                <span className="text-xs font-bold text-slate-200 block mb-1.5">
-                  Accessible Entrances
-                </span>
-                <ul className="space-y-1.5">
-                  {activeBuildingModal.entrances.map((e) => (
-                    <li key={e.id} className="flex items-center gap-2 text-xs text-slate-300">
-                      {e.isAccessible ? (
-                        <Accessibility className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                      ) : (
-                        <DoorClosed className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
-                      )}
-                      <span>{e.name}</span>
-                    </li>
-                  ))}
-                </ul>
+            {/* Entrances */}
+            <div className="p-3 rounded-lg bg-black/30 border border-white/[0.05] space-y-2">
+              <div className="text-xs font-medium text-slate-300">
+                Entrances & Access Points
               </div>
-
-              <div className="flex items-center justify-between text-xs text-slate-400 p-1">
-                <span>Floors: {activeBuildingModal.floors}</span>
-                <span>Category: {activeBuildingModal.category}</span>
-                <span className="text-emerald-400 font-bold">Telemetry Live</span>
+              <div className="space-y-1">
+                {selectedBuilding.entrances.map((e) => (
+                  <div key={e.id} className="flex items-center gap-2 text-xs text-slate-400">
+                    {e.isAccessible ? (
+                      <Accessibility className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    ) : (
+                      <DoorClosed className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                    )}
+                    <span>{e.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
             <button
               onClick={() => {
-                setSelectedBuilding(activeBuildingModal);
-                setActiveBuildingModal(null);
+                setInspectorOpen(false);
                 setIsNavigating(true);
                 setNavigationStepIndex(0);
               }}
-              className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-colors"
+              className="w-full py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
             >
-              <Navigation className="w-4 h-4" />
-              <span>Navigate to {activeBuildingModal.code}</span>
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Route to this Landmark</span>
             </button>
           </div>
         </div>

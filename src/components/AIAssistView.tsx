@@ -1,7 +1,6 @@
 /**
  * CampusPilot AI Assistant View
- * Conversational Natural Language Interface with Smart Spatial Cards,
- * Waypoint HUDs, and integrated Computer Vision triggers for Marwadi University.
+ * Minimalist, distraction-free conversational interface for campus guidance.
  */
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -9,15 +8,13 @@ import { useCampus } from '../context/CampusContext';
 import { campusAI } from '../services/aiService';
 import { CAMPUS_BUILDINGS } from '../data/campusData';
 import {
-  Brain,
-  Camera,
   Mic,
   ArrowUp,
-  ArrowRight,
   Compass,
-  Check,
-  UserCheck,
   Sparkles,
+  Bot,
+  User,
+  ScanLine,
 } from 'lucide-react';
 
 export const AIAssistView: React.FC = () => {
@@ -27,7 +24,6 @@ export const AIAssistView: React.FC = () => {
     isAiThinking,
     setIsAiThinking,
     setSelectedBuilding,
-    setSelectedEvent,
     setActiveScreen,
     setIsVisionModalOpen,
   } = useCampus();
@@ -49,7 +45,7 @@ export const AIAssistView: React.FC = () => {
     const userMsg = {
       id: 'msg-user-' + Date.now(),
       sender: 'user' as const,
-      timestamp: `${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Sent`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       text: query,
     };
     addChatMessage(userMsg);
@@ -61,7 +57,7 @@ export const AIAssistView: React.FC = () => {
       setTimeout(() => {
         setIsAiThinking(false);
         addChatMessage(result.message);
-      }, 350);
+      }, 300);
     } catch {
       setIsAiThinking(false);
     }
@@ -91,221 +87,178 @@ export const AIAssistView: React.FC = () => {
       recognition.start();
     } catch {
       setIsListening(false);
-      setInputQuery("Take me to the MU Central Digital Library");
+      setInputQuery('Take me to the MU Central Digital Library');
     }
   };
 
   const promptSuggestions = [
     "Where is today's Marwadi AI Summit?",
     'Is the Central Library quiet right now?',
-    'Take me to the Main Admin Auditorium',
-    'Where is the Food Court & Amul Parlour?',
-    'Is there an emergency in FOE Block?',
+    'Take me to Food Court & Amul',
+    'Where is the Apple iOS lab in FOE?',
   ];
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-surface overflow-hidden">
-      {/* Neural Core Top Header Banner */}
-      <div className="px-space-md py-3 bg-surface-container-low border-b border-surface-container-high/60 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary flex-shrink-0">
-            <Brain className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="font-headline-sm text-sm font-bold text-on-surface">
-              Marwadi University Neural Assistant
-            </h2>
-            <p className="font-code-telemetry text-xs text-on-surface-variant">
-              Spatial Reasoning & Campus Graph • v4.2 MU
-            </p>
-          </div>
+    <div className="relative w-full h-full flex flex-col bg-[#090d15] text-slate-100 select-none overflow-hidden">
+      {/* Quiet Subheader */}
+      <div className="px-5 py-3 border-b border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center gap-2">
+          <Bot className="w-4 h-4 text-sky-400" />
+          <span className="font-medium text-slate-200">Campus Intelligence Assistant</span>
         </div>
-
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 text-[11px] font-bold">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Online</span>
-        </div>
+        <button
+          onClick={() => setIsVisionModalOpen(true)}
+          className="flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+        >
+          <ScanLine className="w-3.5 h-3.5 text-sky-400" />
+          <span>Vision Inspector</span>
+        </button>
       </div>
 
-      {/* Chat Messages Stream */}
-      <div className="flex-1 overflow-y-auto p-space-md space-y-4 max-w-3xl mx-auto w-full">
+      {/* Messages Thread */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 max-w-3xl mx-auto w-full pb-36">
         {chatMessages.map((msg) => {
           const isUser = msg.sender === 'user';
-
           return (
             <div
               key={msg.id}
-              className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-full`}
+              className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
             >
-              <div className="flex items-center gap-1.5 mb-1 px-1">
-                <span className="font-code-telemetry text-[11px] text-on-surface-variant">
-                  {msg.timestamp}
-                </span>
-                {msg.badge && (
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-error-container text-error">
-                    {msg.badge}
-                  </span>
-                )}
+              <div
+                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-semibold ${
+                  isUser
+                    ? 'bg-sky-500 text-slate-950'
+                    : 'bg-[#0e1320] text-sky-400 border border-white/[0.08]'
+                }`}
+              >
+                {isUser ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
               </div>
 
-              {/* Message Bubble */}
-              {msg.text && (
+              <div className={`space-y-2 max-w-[85%] sm:max-w-lg ${isUser ? 'items-end' : ''}`}>
                 <div
-                  className={`p-3.5 rounded-2xl text-body-md text-sm sm:text-base leading-relaxed max-w-[88%] shadow-xs ${
+                  className={`p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                     isUser
-                      ? 'bg-primary text-on-primary rounded-tr-xs'
-                      : 'bg-surface-container-low text-on-surface rounded-tl-xs border border-surface-container'
+                      ? 'bg-sky-600 text-white rounded-tr-xs'
+                      : 'bg-[#0e1320] border border-white/[0.06] text-slate-200 rounded-tl-xs'
                   }`}
                 >
-                  {msg.text}
+                  <p className="whitespace-pre-wrap">{msg.text}</p>
                 </div>
-              )}
 
-              {/* Rich Smart Card if present */}
-              {msg.smartCard && (
-                <div className="mt-2.5 w-full max-w-md p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-sm space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-secondary-container/40 text-secondary uppercase">
-                        {msg.smartCard.badgeText}
+                {/* Smart Card Attached to AI Message */}
+                {msg.smartCard && (
+                  <div className="p-3.5 rounded-xl bg-[#0e1320] border border-white/[0.08] space-y-2 shadow-sm">
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span className="font-semibold text-sky-400">
+                        {msg.smartCard.badgeText || 'Spatial Route'}
                       </span>
-                      <h4 className="font-headline-sm text-base font-bold text-on-surface mt-1">
-                        {msg.smartCard.title}
-                      </h4>
-                      <p className="font-body-sm text-xs text-on-surface-variant">
-                        {msg.smartCard.destinationDetail}
-                      </p>
+                      <span>{msg.smartCard.distance} · {msg.smartCard.estWalk}</span>
                     </div>
 
-                    <div className="text-right flex-shrink-0">
-                      <span className="font-code-telemetry text-xs font-bold text-primary block">
-                        {msg.smartCard.distance}
-                      </span>
-                      <span className="font-code-telemetry text-[11px] text-on-surface-variant">
-                        ~{msg.smartCard.estWalk}
-                      </span>
+                    <div className="font-semibold text-white text-sm">
+                      {msg.smartCard.title}
                     </div>
-                  </div>
 
-                  {/* Waypoint Micro HUD */}
-                  {msg.smartCard.waypoints && (
-                    <div className="p-2.5 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-between text-xs font-code-telemetry">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <span className="text-on-surface-variant truncate">{msg.smartCard.waypoints.origin}</span>
-                        <span className="text-secondary font-bold">→</span>
-                        <span className="text-primary font-bold truncate">{msg.smartCard.waypoints.via}</span>
-                        <span className="text-secondary font-bold">→</span>
-                        <span className="text-on-surface font-bold truncate">{msg.smartCard.waypoints.dest}</span>
-                      </div>
+                    <div className="text-xs text-slate-400">
+                      {msg.smartCard.destinationName} · {msg.smartCard.destinationDetail}
                     </div>
-                  )}
 
-                  {/* Smart Card Action Buttons */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      onClick={() => {
-                        if (msg.smartCard?.buildingId) {
-                          const bldg = CAMPUS_BUILDINGS.find((b) => b.id === msg.smartCard?.buildingId);
-                          if (bldg) setSelectedBuilding(bldg);
-                        }
-                        if (msg.smartCard?.eventData) {
-                          setSelectedEvent(msg.smartCard.eventData);
-                        }
-                        setActiveScreen('map');
-                      }}
-                      className="flex-1 py-2 px-3 rounded-xl bg-primary text-on-primary font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs hover:bg-primary/95 active:scale-95 transition-transform cursor-pointer"
-                    >
-                      <Compass className="w-3.5 h-3.5" />
-                      <span>Show 3D Route</span>
-                    </button>
-
-                    {msg.smartCard.eventData && (
+                    <div className="pt-2 flex items-center gap-2">
                       <button
                         onClick={() => {
-                          setSelectedEvent(msg.smartCard?.eventData || null);
-                          setActiveScreen('events');
+                          if (msg.smartCard?.buildingId) {
+                            const b = CAMPUS_BUILDINGS.find(
+                              (bldg) => bldg.id === msg.smartCard?.buildingId
+                            );
+                            if (b) setSelectedBuilding(b);
+                          }
+                          setActiveScreen('map');
                         }}
-                        className="py-2 px-3 rounded-xl bg-surface-container text-on-surface font-semibold text-xs hover:bg-surface-container-high transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition-colors"
                       >
-                        View Event
+                        <Compass className="w-3.5 h-3.5" />
+                        <span>Show on 3D Map</span>
                       </button>
-                    )}
+                    </div>
                   </div>
+                )}
+
+                <div
+                  className={`text-[10px] text-slate-500 px-1 ${
+                    isUser ? 'text-right' : 'text-left'
+                  }`}
+                >
+                  {msg.timestamp}
                 </div>
-              )}
+              </div>
             </div>
           );
         })}
 
-        {/* AI Typing Thinking Indicator */}
         {isAiThinking && (
-          <div className="flex items-center gap-2 p-3 rounded-2xl bg-surface-container-low text-on-surface-variant w-fit">
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce"></span>
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce delay-100"></span>
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce delay-200"></span>
-            <span className="font-code-telemetry text-xs ml-1">Computing Marwadi University spatial vectors...</span>
+          <div className="flex items-center gap-2 text-xs text-slate-400 p-2">
+            <Sparkles className="w-3.5 h-3.5 text-sky-400 animate-spin" />
+            <span>Analyzing campus map...</span>
           </div>
         )}
 
         <div ref={scrollRef} />
       </div>
 
-      {/* Suggestion Prompts Row */}
-      <div className="p-space-xs bg-surface-container-low/60 border-t border-surface-container flex items-center gap-2 overflow-x-auto no-scrollbar">
-        {promptSuggestions.map((prompt) => (
-          <button
-            key={prompt}
-            onClick={() => handleSend(prompt)}
-            className="flex-shrink-0 px-3 py-1.5 rounded-full bg-surface-container-lowest hover:bg-surface-container text-on-surface text-xs font-medium border border-surface-container transition-all active:scale-95 cursor-pointer shadow-2xs"
-          >
-            {prompt}
-          </button>
-        ))}
-      </div>
+      {/* Input Dock */}
+      <div className="absolute bottom-14 md:bottom-0 inset-x-0 p-3 sm:p-4 bg-[#090d15]/90 backdrop-blur-md border-t border-white/[0.06]">
+        <div className="max-w-3xl mx-auto space-y-2">
+          {/* Quick suggestions */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
+            {promptSuggestions.map((s) => (
+              <button
+                key={s}
+                onClick={() => handleSend(s)}
+                className="shrink-0 px-2.5 py-1 rounded-md bg-white/[0.03] hover:bg-white/[0.06] text-slate-400 hover:text-slate-200 border border-white/[0.06] transition-colors cursor-pointer"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
 
-      {/* Input Composer Dock */}
-      <div className="p-space-sm bg-surface-container-lowest border-t border-surface-container shadow-md">
-        <div className="max-w-3xl mx-auto flex items-center gap-2">
-          {/* Computer Vision Trigger Button */}
-          <button
-            onClick={() => setIsVisionModalOpen(true)}
-            className="w-10 h-10 rounded-xl bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center flex-shrink-0 active:scale-95 transition-all cursor-pointer"
-            title="Scan campus photo or CCTV feed with Computer Vision"
-          >
-            <Camera className="w-5 h-5 text-secondary" />
-          </button>
+          {/* Form input */}
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              value={inputQuery}
+              onChange={(e) => setInputQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder="Ask anything about campus buildings, labs, venues, directions..."
+              className="w-full h-11 pl-4 pr-20 rounded-xl bg-[#0e1320] border border-white/[0.08] text-slate-100 placeholder:text-slate-500 text-xs sm:text-sm focus:outline-hidden focus:border-sky-500"
+            />
 
-          {/* Speech / Voice Input Button */}
-          <button
-            onClick={handleSpeechToggle}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 active:scale-95 transition-all cursor-pointer ${
-              isListening ? 'bg-error text-white animate-pulse' : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
-            }`}
-            title="Voice Query"
-          >
-            <Mic className="w-5 h-5" />
-          </button>
+            <div className="absolute right-2 flex items-center gap-1">
+              <button
+                onClick={handleSpeechToggle}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  isListening
+                    ? 'bg-red-600 text-white animate-pulse'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+                }`}
+                title="Voice Input"
+              >
+                <Mic className="w-3.5 h-3.5" />
+              </button>
 
-          {/* Text Input Field */}
-          <input
-            type="text"
-            value={inputQuery}
-            onChange={(e) => setInputQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSend();
-            }}
-            placeholder="Ask about Marwadi University buildings, labs, summits, food..."
-            className="flex-1 h-10 px-3.5 rounded-xl bg-surface-container-low text-on-surface placeholder:text-on-surface-variant text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/40 border border-surface-container"
-          />
-
-          {/* Send Button */}
-          <button
-            onClick={() => handleSend()}
-            disabled={!inputQuery.trim()}
-            className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center flex-shrink-0 disabled:opacity-40 disabled:pointer-events-none active:scale-95 shadow-xs transition-all cursor-pointer"
-          >
-            <ArrowUp className="w-5 h-5" />
-          </button>
+              <button
+                onClick={() => handleSend()}
+                disabled={!inputQuery.trim()}
+                className="p-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 disabled:opacity-30 text-slate-950 transition-colors cursor-pointer font-bold"
+              >
+                <ArrowUp className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

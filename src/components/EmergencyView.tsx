@@ -1,51 +1,46 @@
 /**
- * CampusPilot Emergency Evacuation Tactical System
- * Safety Command Center with Real-Time Incident Tracking for Marwadi University,
- * Multi-Hazard Trigger Grid, and Highway Gate 1 Safe-Route Evacuation HUD.
+ * CampusPilot Emergency Evacuation & Safety System
+ * Calm, clear tactical safety center for Marwadi University.
  */
 
 import React, { useState } from 'react';
 import { useCampus } from '../context/CampusContext';
 import { CAMPUS_BUILDINGS } from '../data/campusData';
 import {
-  AlertTriangle,
+  AlertCircle,
   Flame,
   Stethoscope,
   Users,
   Ban,
   Droplets,
   ShieldAlert,
-  Brain,
   Navigation,
   CheckCircle2,
-  ShieldCheck,
-  ScanLine,
   Phone,
+  ScanLine,
   Check,
 } from 'lucide-react';
 
 export const EmergencyView: React.FC = () => {
   const {
     isEmergencyActive,
-    activeIncident,
     triggerEmergency,
     resolveEmergency,
     setActiveScreen,
     setSelectedBuilding,
     setIsNavigating,
     setIsVisionModalOpen,
-    userProfile,
   } = useCampus();
 
   const [hasCheckedInSafe, setHasCheckedInSafe] = useState(false);
 
   const emergencyCategories = [
-    { type: 'Fire', label: 'Fire & Smoke', icon: Flame, color: 'bg-red-600' },
-    { type: 'Medical Emergency', label: 'Medical Aid', icon: Stethoscope, color: 'bg-rose-600' },
-    { type: 'Overcrowding', label: 'Stampede / Crowd', icon: Users, color: 'bg-amber-600' },
-    { type: 'Blocked Road', label: 'Path Obstruction', icon: Ban, color: 'bg-orange-600' },
-    { type: 'Flood', label: 'Flood / Leak', icon: Droplets, color: 'bg-blue-600' },
-    { type: 'Security Alert', label: 'Security Alert', icon: ShieldAlert, color: 'bg-purple-600' },
+    { type: 'Fire', label: 'Fire & Smoke', icon: Flame },
+    { type: 'Medical Emergency', label: 'Medical Aid', icon: Stethoscope },
+    { type: 'Overcrowding', label: 'Crowd Obstruction', icon: Users },
+    { type: 'Blocked Road', label: 'Corridor Blocked', icon: Ban },
+    { type: 'Flood', label: 'Water Leak', icon: Droplets },
+    { type: 'Security Alert', label: 'Security Assist', icon: ShieldAlert },
   ];
 
   const handleStartEvacuation = () => {
@@ -63,238 +58,158 @@ export const EmergencyView: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-slate-950 text-slate-100 overflow-y-auto pb-24 select-none">
-      {/* Tactical Status Banner */}
-      <div className="px-space-md py-3 bg-slate-900 border-b border-red-900/40 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-error flex items-center justify-center text-on-error shadow-sm flex-shrink-0">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-headline-sm text-sm font-bold text-red-200">
-                MU Emergency Command HUD
-              </h2>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                isEmergencyActive ? 'bg-error text-white animate-pulse' : 'bg-emerald-900/60 text-emerald-300'
-              }`}>
-                {isEmergencyActive ? 'Active Protocol' : 'Normal Standby'}
-              </span>
+    <div className="relative w-full h-full overflow-y-auto pb-28 select-none bg-[#090d15] text-slate-100">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Status Header */}
+        <div className="p-5 rounded-2xl bg-[#0e1320] border border-white/[0.08] flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                isEmergencyActive ? 'bg-red-500/20 text-red-400' : 'bg-white/[0.04] text-slate-400'
+              }`}
+            >
+              <AlertCircle className="w-5 h-5" />
             </div>
-            <p className="font-code-telemetry text-xs text-slate-400">
-              Emergency Hotlines: +91 281 7123456 / 100 / 108 (24/7 Security)
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-semibold text-white">
+                  Campus Safety & Rapid Evacuation
+                </h1>
+                <span
+                  className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                    isEmergencyActive
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  }`}
+                >
+                  {isEmergencyActive ? 'Protocol Active' : 'Normal Standby'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Direct link to Marwadi University control center and tactical egress routing.
+              </p>
+            </div>
+          </div>
+
+          {isEmergencyActive && (
+            <button
+              onClick={resolveEmergency}
+              className="px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 text-xs font-medium cursor-pointer transition-colors"
+            >
+              Clear Active Incident
+            </button>
+          )}
+        </div>
+
+        {/* Primary Safe Assembly Card */}
+        <div className="p-6 rounded-2xl bg-[#0e1320] border border-white/[0.08] space-y-3">
+          <div className="text-xs text-sky-400 font-medium">
+            Muster Point Egress
+          </div>
+          <h2 className="text-base font-semibold text-white">
+            Primary Safe Assembly: Highway Gate 1 Lawn
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-xl leading-relaxed">
+            In any evacuation scenario, pedestrian pathways automatically compute clear passage away from hazardous academic corridors toward Highway Gate 1.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2.5 pt-2">
+            <button
+              onClick={handleStartEvacuation}
+              className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Route to Safe Muster Zone</span>
+            </button>
+
+            <button
+              onClick={handleCheckInSafe}
+              className="px-3.5 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.09] text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              {hasCheckedInSafe ? (
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <CheckCircle2 className="w-3.5 h-3.5 text-slate-400" />
+              )}
+              <span>{hasCheckedInSafe ? 'Checked-In As Safe' : 'Mark Myself Safe'}</span>
+            </button>
+
+            <button
+              onClick={() => setIsVisionModalOpen(true)}
+              className="px-3.5 py-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] text-slate-400 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <ScanLine className="w-3.5 h-3.5 text-sky-400" />
+              <span>Inspect Obstruction</span>
+            </button>
           </div>
         </div>
 
-        {isEmergencyActive && (
-          <button
-            onClick={resolveEmergency}
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer border border-slate-700"
-          >
-            Clear Alert
-          </button>
-        )}
-      </div>
-
-      <div className="p-space-md max-w-4xl mx-auto w-full space-y-4">
-        {/* Real-Time Active Incident Card */}
-        {isEmergencyActive && activeIncident ? (
-          <div className="p-5 rounded-2xl bg-slate-900 border-2 border-red-600/80 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-600 text-white flex items-center gap-1.5 shadow-sm">
-                  <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                  {activeIncident.severity} Severity
-                </span>
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-red-300 border border-slate-700">
-                  {activeIncident.type}
-                </span>
-              </div>
-              <span className="font-code-telemetry text-xs text-slate-400">
-                Verified: {activeIncident.timestamp}
-              </span>
-            </div>
-
-            <h3 className="font-headline-md text-lg sm:text-xl font-bold text-white mb-1">
-              {activeIncident.title}
-            </h3>
-            <p className="font-body-md text-slate-300 text-sm mb-4 leading-relaxed">
-              {activeIncident.description}
-            </p>
-
-            {/* Tactical Evacuation Matrix */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 rounded-xl bg-slate-950/80 border border-slate-800 mb-4">
-              <div>
-                <span className="text-[10px] font-code-telemetry text-slate-400 uppercase block">
-                  Location
-                </span>
-                <span className="font-label-md font-bold text-red-300 text-sm truncate block">
-                  {activeIncident.location}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] font-code-telemetry text-slate-400 uppercase block">
-                  Hazard Proximity
-                </span>
-                <span className="font-label-md font-bold text-amber-400 text-sm block">
-                  170 meters
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] font-code-telemetry text-slate-400 uppercase block">
-                  Transit to Safety
-                </span>
-                <span className="font-label-md font-bold text-emerald-400 text-sm block">
-                  ~3 mins walk
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] font-code-telemetry text-slate-400 uppercase block">
-                  Designated Safe Zone
-                </span>
-                <span className="font-label-md font-bold text-white text-sm truncate block">
-                  Highway Gate 1 Lawn 1
-                </span>
-              </div>
-            </div>
-
-            {/* AI Real-time Directive */}
-            <div className="p-3.5 rounded-xl bg-red-950/50 border border-red-500/40 mb-4 flex items-start gap-3">
-              <Brain className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-red-200 block mb-0.5">
-                  AI Tactical Evacuation Directive
-                </span>
-                <p className="text-xs text-red-300 leading-relaxed">
-                  {activeIncident.recommendedDirective}
-                </p>
-              </div>
-            </div>
-
-            {/* Evacuation Actions */}
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                onClick={handleStartEvacuation}
-                className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-headline-sm text-sm font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer"
-              >
-                <Navigation className="w-4 h-4" />
-                <span>Navigate Highway Gate 1 Safe Zone (3D Map)</span>
-              </button>
-
-              <button
-                onClick={handleCheckInSafe}
-                className={`py-3 px-5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer border ${
-                  hasCheckedInSafe
-                    ? 'bg-emerald-800 text-emerald-200 border-emerald-600'
-                    : 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 active:scale-95'
-                }`}
-              >
-                {hasCheckedInSafe ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-300" />
-                    <span>Reported Safe ✓</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>I Am Safe (Check-in)</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="p-5 rounded-2xl bg-slate-900 border border-emerald-900/60 shadow-lg text-center py-8">
-            <div className="w-12 h-12 rounded-full bg-emerald-900/40 text-emerald-400 flex items-center justify-center mx-auto mb-3">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
-            <h3 className="font-headline-sm text-lg font-bold text-white mb-1">
-              Marwadi University Normal Safety State
-            </h3>
-            <p className="font-body-md text-xs sm:text-sm text-slate-400 max-w-md mx-auto mb-4">
-              All academic blocks (FOE, FMS), digital library, and sports avenues have clear pathways and 100% active CCTV optical mesh monitoring.
-            </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 text-xs font-mono border border-emerald-800">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>All 38 Optical Mesh Sensors Active</span>
-            </div>
-          </div>
-        )}
-
-        {/* Instant Multi-Hazard Incident Trigger Grid */}
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h3 className="font-headline-sm text-base font-bold text-white">
-                Report Campus Incident or Trigger Simulation
-              </h3>
-              <p className="font-body-sm text-xs text-slate-400">
-                Immediately updates routing graphs and alerts Marwadi University response squads
-              </p>
-            </div>
-            <button
-              onClick={() => setIsVisionModalOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-            >
-              <ScanLine className="w-4 h-4" />
-              <span>Vision Scan</span>
-            </button>
+        {/* Hazard Quick Trigger Grid */}
+        <div className="space-y-3">
+          <div className="text-xs font-medium text-slate-400">
+            Simulate or Report Incident
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
             {emergencyCategories.map((cat) => {
               const Icon = cat.icon;
               return (
                 <button
                   key={cat.type}
                   onClick={() => triggerEmergency(cat.type)}
-                  className="p-3 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-left transition-all active:scale-95 cursor-pointer flex flex-col gap-2"
+                  className="p-3.5 rounded-xl bg-[#0e1320] hover:bg-[#131929] border border-white/[0.06] hover:border-white/[0.12] flex flex-col items-center gap-2 text-center transition-colors cursor-pointer group"
                 >
-                  <div className={`w-8 h-8 rounded-lg ${cat.color} flex items-center justify-center text-white shadow-xs`}>
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.04] group-hover:bg-white/[0.08] text-slate-300 group-hover:text-white flex items-center justify-center transition-colors">
                     <Icon className="w-4 h-4" />
                   </div>
-                  <div>
-                    <span className="font-label-md text-xs font-bold text-white block">
-                      {cat.label}
-                    </span>
-                    <span className="text-[11px] text-slate-400">
-                      Trigger Protocol
-                    </span>
-                  </div>
+                  <span className="text-xs text-slate-300 group-hover:text-white">
+                    {cat.label}
+                  </span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Emergency Contacts Hotlines */}
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg">
-          <h3 className="font-headline-sm text-base font-bold text-white mb-3 flex items-center gap-2">
-            <Phone className="w-4 h-4 text-emerald-400" />
-            <span>Campus Emergency Contacts</span>
-          </h3>
+        {/* Rapid Response Hotlines */}
+        <div className="p-5 rounded-2xl bg-[#0e1320] border border-white/[0.08] space-y-3">
+          <div className="text-xs font-medium text-slate-400">
+            Marwadi University 24/7 Response Hotlines
+          </div>
 
-          <div className="space-y-2">
-            {userProfile.emergencyContacts.map((c, idx) => (
-              <div
-                key={idx}
-                className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between"
-              >
-                <div>
-                  <span className="text-xs font-bold text-white block">{c.name}</span>
-                  <span className="text-[11px] text-slate-400">{c.role}</span>
-                </div>
-                <a
-                  href={`tel:${c.number.split('/')[0].trim()}`}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 font-code-telemetry text-xs font-bold border border-emerald-500/30"
-                >
-                  {c.number}
-                </a>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="p-3 rounded-xl bg-black/30 border border-white/[0.04]">
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                <Phone className="w-3 h-3 text-sky-400" />
+                <span>Campus Control Desk</span>
               </div>
-            ))}
+              <div className="text-sm font-semibold text-white mt-1 tabular-nums">
+                +91 281 7123456
+              </div>
+              <div className="text-[11px] text-slate-500 mt-0.5">24/7 Security Dispatch</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-black/30 border border-white/[0.04]">
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                <Phone className="w-3 h-3 text-emerald-400" />
+                <span>Hostel Health Clinic</span>
+              </div>
+              <div className="text-sm font-semibold text-white mt-1 tabular-nums">
+                +91 281 7123499
+              </div>
+              <div className="text-[11px] text-slate-500 mt-0.5">Paramedic & First Aid</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-black/30 border border-white/[0.04]">
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                <Phone className="w-3 h-3 text-red-400" />
+                <span>National Emergency</span>
+              </div>
+              <div className="text-sm font-semibold text-white mt-1 tabular-nums">
+                112 / 108
+              </div>
+              <div className="text-[11px] text-slate-500 mt-0.5">Police & Ambulance</div>
+            </div>
           </div>
         </div>
       </div>

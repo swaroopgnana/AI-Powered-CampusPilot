@@ -1,146 +1,131 @@
 /**
- * CampusPilot Header Component
- * Branded for Marwadi University Intelligent Campus Assistance
+ * CampusPilot Header - Precision Executive Design
+ * Clean, restrained, distraction-free top navigation bar.
  */
 
 import React from 'react';
 import { useCampus } from '../context/CampusContext';
 import { ScreenId } from '../types';
-import { ArrowLeft, AlertTriangle, Bell } from 'lucide-react';
+import { Search, Bell, AlertCircle, Compass } from 'lucide-react';
 
 interface HeaderProps {
   onOpenNotifications: () => void;
+  onOpenSpotlight: () => void;
   unreadCount: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenNotifications, unreadCount }) => {
-  const { activeScreen, setActiveScreen, isEmergencyActive, triggerEmergency, userProfile } = useCampus();
+export const Header: React.FC<HeaderProps> = ({
+  onOpenNotifications,
+  onOpenSpotlight,
+  unreadCount,
+}) => {
+  const { activeScreen, setActiveScreen, isEmergencyActive, userProfile } = useCampus();
 
-  const getScreenTitle = (screen: ScreenId): string => {
-    switch (screen) {
-      case 'home':
-        return 'CampusPilot • Marwadi University';
-      case 'assistant':
-        return 'MU AI Assistant';
-      case 'map':
-      case 'navigation':
-        return '3D Digital Twin Map';
-      case 'events':
-        return 'MU Events & Summits';
-      case 'emergency':
-        return 'Emergency SOS Tactical HUD';
-      case 'facilities':
-        return 'MU Facilities & Labs';
-      case 'analytics':
-        return 'Campus Pulse Analytics';
-      case 'profile':
-        return 'Student Profile';
-      default:
-        return 'CampusPilot';
-    }
-  };
-
-  const isDeepScreen = activeScreen === 'emergency' || activeScreen === 'facilities' || activeScreen === 'analytics';
+  const navItems: { id: ScreenId; label: string }[] = [
+    { id: 'map', label: '3D Campus' },
+    { id: 'home', label: 'Overview' },
+    { id: 'assistant', label: 'AI Assistant' },
+    { id: 'facilities', label: 'Directory' },
+    { id: 'events', label: 'Events' },
+    { id: 'analytics', label: 'Telemetry' },
+  ];
 
   return (
-    <header className="fixed top-0 inset-x-0 z-40 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe">
-      <div className="h-16 px-gutter flex items-center justify-between gap-space-sm max-w-7xl mx-auto w-full">
-        {/* Left Brand / Back Button */}
-        <div className="flex items-center gap-space-sm min-w-0">
-          {isDeepScreen ? (
+    <header className="fixed top-0 inset-x-0 z-40 h-14 bg-[#0a0d14]/85 backdrop-blur-md border-b border-white/[0.07] px-4 sm:px-6 flex items-center justify-between select-none">
+      {/* Brand Monogram & Title */}
+      <div className="flex items-center gap-3 shrink-0">
+        <button
+          onClick={() => setActiveScreen('home')}
+          className="flex items-center gap-2.5 text-left cursor-pointer group transition-opacity hover:opacity-90"
+        >
+          <div className="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/25 flex items-center justify-center text-sky-400">
+            <Compass className="w-4 h-4" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="font-semibold text-sm tracking-tight text-white">
+              CampusPilot
+            </span>
+            <span className="text-xs text-slate-500 hidden sm:inline font-normal">
+              Marwadi University
+            </span>
+          </div>
+        </button>
+      </div>
+
+      {/* Primary Navigation Tabs */}
+      <nav className="hidden md:flex items-center gap-1">
+        {navItems.map((item) => {
+          const isActive =
+            activeScreen === item.id || (item.id === 'map' && activeScreen === 'navigation');
+          return (
             <button
-              aria-label="Go back"
-              onClick={() => setActiveScreen('home')}
-              className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container active:scale-95 transition-colors cursor-pointer mr-1"
+              key={item.id}
+              onClick={() => setActiveScreen(item.id)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                isActive
+                  ? 'bg-white/[0.08] text-white font-semibold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+              }`}
             >
-              <ArrowLeft className="w-5 h-5" />
+              {item.label}
             </button>
-          ) : null}
+          );
+        })}
+      </nav>
 
-          {/* Logo Pin */}
-          <button
-            onClick={() => setActiveScreen('home')}
-            className="flex items-center gap-space-sm min-w-0 text-left cursor-pointer"
-          >
-            <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
-              <svg viewBox="0 0 40 40" className="w-8 h-8 drop-shadow-sm" fill="none">
-                <path
-                  d="M 20 2 C 10 2 2 10 2 20 C 2 31 20 40 20 40 C 20 40 38 31 38 20 C 38 10 30 2 20 2 Z"
-                  fill="#0f172a"
-                />
-                <circle cx="20" cy="18" r="9" stroke="#0284c7" strokeWidth="2.5" />
-                <circle cx="20" cy="18" r="4.5" fill="#38bdf8" />
-                <line x1="20" y1="9" x2="20" y2="4" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="20" cy="4" r="2" fill="#38bdf8" />
-                <line x1="9" y1="18" x2="4" y2="18" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="4" cy="18" r="2" fill="#38bdf8" />
-                <line x1="31" y1="18" x2="36" y2="18" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="36" cy="18" r="2" fill="#38bdf8" />
-                <polygon points="30,8 32,13 37,15 32,17 30,22 28,17 23,15 28,13" fill="#38bdf8" />
-              </svg>
-            </div>
+      {/* Utility Actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Quick Search */}
+        <button
+          onClick={onOpenSpotlight}
+          className="flex items-center gap-2 px-2.5 py-1.2 rounded-md bg-white/[0.03] hover:bg-white/[0.06] text-slate-400 hover:text-slate-200 text-xs border border-white/[0.06] transition-colors cursor-pointer"
+          title="Search landmarks, labs, events (⌘K)"
+        >
+          <Search className="w-3.5 h-3.5 text-slate-400" />
+          <span className="hidden sm:inline">Search</span>
+          <kbd className="hidden sm:inline-block text-[10px] text-slate-500 font-mono bg-white/[0.04] px-1 py-0.5 rounded border border-white/[0.08]">
+            ⌘K
+          </kbd>
+        </button>
 
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-space-xs">
-                <span className="font-headline-sm text-headline-sm text-on-surface truncate font-bold">
-                  {getScreenTitle(activeScreen)}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${isEmergencyActive ? 'bg-error animate-ping' : 'bg-emerald-500 animate-pulse'}`}></span>
-                <span className="font-code-telemetry text-code-telemetry text-on-surface-variant truncate">
-                  {isEmergencyActive ? 'Code Orange • Tactical Evac' : 'Marwadi University • Digital Twin Live'}
-                </span>
-              </div>
-            </div>
-          </button>
-        </div>
+        {/* SOS Emergency Link (Restrained unless active) */}
+        <button
+          onClick={() => setActiveScreen('emergency')}
+          className={`flex items-center gap-1.5 px-2.5 py-1.2 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+            isEmergencyActive
+              ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+          }`}
+          title="Emergency protocols and evacuation routes"
+        >
+          <AlertCircle className={`w-3.5 h-3.5 ${isEmergencyActive ? 'text-red-400' : 'text-slate-500'}`} />
+          <span className="hidden sm:inline">{isEmergencyActive ? 'SOS Active' : 'Safety'}</span>
+        </button>
 
-        {/* Right Action Icons: SOS, Notifications, Avatar */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Quick SOS Trigger Button */}
-          <button
-            onClick={() => {
-              if (isEmergencyActive) {
-                setActiveScreen('emergency');
-              } else {
-                triggerEmergency('Fire');
-              }
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shadow-xs ${
-              isEmergencyActive
-                ? 'bg-error text-on-error animate-pulse'
-                : 'bg-error/10 hover:bg-error/20 text-error'
-            }`}
-          >
-            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-            <span className="hidden sm:inline">SOS</span>
-          </button>
+        {/* Notifications */}
+        <button
+          onClick={onOpenNotifications}
+          className="relative p-1.5 rounded-md text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] transition-colors cursor-pointer"
+          aria-label="Notifications"
+        >
+          <Bell className="w-4 h-4" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+          )}
+        </button>
 
-          {/* Notifications Trigger */}
-          <button
-            onClick={onOpenNotifications}
-            className="relative w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container active:scale-95 transition-colors cursor-pointer"
-            aria-label="Notifications"
-          >
-            <Bell className="w-5 h-5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span>
-            )}
-          </button>
-
-          {/* User Profile Avatar */}
-          <button
-            onClick={() => setActiveScreen('profile')}
-            className="flex items-center gap-2 p-1 rounded-full hover:bg-surface-container cursor-pointer transition-colors"
-          >
-            <img
-              src={userProfile.avatarUrl}
-              alt={userProfile.name}
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20"
-            />
-          </button>
-        </div>
+        {/* Profile Avatar */}
+        <button
+          onClick={() => setActiveScreen('profile')}
+          className="flex items-center p-0.5 rounded-md hover:ring-1 hover:ring-white/20 transition-all cursor-pointer ml-1"
+          title={`${userProfile.name} - Profile`}
+        >
+          <img
+            src={userProfile.avatarUrl}
+            alt={userProfile.name}
+            className="w-6 h-6 rounded-md object-cover border border-white/[0.1]"
+          />
+        </button>
       </div>
     </header>
   );
